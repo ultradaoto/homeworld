@@ -1,0 +1,10 @@
+{
+  "commander_input": "We need to start researching AI trends",
+  "build_order": {
+    "build_order": "scout",
+    "reason": "With no active agents and zero findings in memory, deploying a scout first will rapidly identify current AI trend signals before committing heavier resources to full research.",
+    "priority": 5
+  },
+  "router_result": "spawned:scout_65c436",
+  "timestamp": "20260314_071931"
+}

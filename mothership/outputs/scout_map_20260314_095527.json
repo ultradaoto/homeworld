@@ -1,0 +1,1696 @@
+{
+  "scout_id": "scout_1eabe3",
+  "root": "D:\\Projects\\Homeworld",
+  "timestamp": "20260314_095527",
+  "total_sectors": 64,
+  "total_files": 743,
+  "ru_earned": 1486,
+  "class_distribution": {
+    "scout": 53,
+    "salvage": 1,
+    "destroyer": 5,
+    "support": 5
+  },
+  "sectors": [
+    {
+      "id": 0,
+      "parent_id": -1,
+      "path": "/",
+      "depth": 0,
+      "sibling_idx": 0,
+      "file_count": 6,
+      "subdir_count": 3,
+      "file_types": {
+        "": 1,
+        ".cfg": 1,
+        ".bat": 2,
+        ".ps1": 2
+      },
+      "sample_files": [
+        ".gitignore",
+        "Homeworld.cfg",
+        "launch-windowed.bat",
+        "launch.bat",
+        "setup.ps1",
+        "stage-assets.ps1"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 30.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "briefing": "**Tactical Briefing:** Root directory of a **Homeworld** game mod or configuration project, containing launch scripts (`launch.bat`, `launch-windowed.bat`), a game config (`Homeworld.cfg`), and PowerShell setup/asset-staging scripts (`setup.ps1`, `stage-assets.ps1`).\n\n**Investigation Priority: Moderate** — `stage-assets.ps1` and `setup.ps1` are worth inspecting to understand the build/deployment pipeline; the 3 subdirectories likely hold the actual mod assets and source content warran"
+    },
+    {
+      "id": 1,
+      "parent_id": 0,
+      "path": "HomeworldSDL",
+      "depth": 1,
+      "sibling_idx": 0,
+      "file_count": 10,
+      "subdir_count": 10,
+      "file_types": {
+        "": 5,
+        ".yml": 1,
+        ".txt": 2,
+        ".md": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        ".clang-format",
+        ".git-blame-ignore-revs",
+        ".gitignore",
+        ".gitlab-ci.yml",
+        "CHANGELOG",
+        "LICENSE.txt",
+        "NOTES",
+        "README.md"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 30.0,
+        "y": 25.0,
+        "z": 0.0
+      },
+      "briefing": "**Briefing:** This is the root directory of the HomeworldSDL project — an SDL-based port/rebuild of the Homeworld game engine — containing standard repo scaffolding: CI pipeline (`.gitlab-ci.yml`), license (`LICENSE.txt`), changelog (`CHANGELOG`), and code formatting rules (`.clang-format`).\n\n**Investigation value: Yes** — the 10 subdirectories are where the actual source code, assets, and build configuration reside; descend into those for tactical detail."
+    },
+    {
+      "id": 2,
+      "parent_id": 1,
+      "path": "HomeworldSDL/.vscode",
+      "depth": 2,
+      "sibling_idx": 0,
+      "file_count": 3,
+      "subdir_count": 0,
+      "file_types": {
+        ".json": 3
+      },
+      "sample_files": [
+        "extensions.json",
+        "launch.json",
+        "settings.json"
+      ],
+      "ship_class": "salvage",
+      "pos": {
+        "x": 135.0,
+        "y": 50.0,
+        "z": 0.0
+      },
+      "briefing": ""
+    },
+    {
+      "id": 3,
+      "parent_id": 1,
+      "path": "HomeworldSDL/Linux",
+      "depth": 2,
+      "sibling_idx": 1,
+      "file_count": 12,
+      "subdir_count": 1,
+      "file_types": {
+        "": 6,
+        ".md": 1,
+        ".x86_64": 1,
+        ".old": 1,
+        ".lock": 1,
+        ".nix": 1,
+        ".kdevelop": 1
+      },
+      "sample_files": [
+        ".envrc",
+        "AUTHORS",
+        "BUGS",
+        "BUILD.md",
+        "INSTALL",
+        "README",
+        "README.X86_64",
+        "bootstrap"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 103.4,
+        "y": 50.0,
+        "z": 86.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 4,
+      "parent_id": 3,
+      "path": "HomeworldSDL/Linux/stuff",
+      "depth": 3,
+      "sibling_idx": 0,
+      "file_count": 4,
+      "subdir_count": 1,
+      "file_types": {
+        ".am": 1,
+        ".m4": 1,
+        ".ac": 1,
+        ".in": 1
+      },
+      "sample_files": [
+        "Makefile.am",
+        "acinclude.m4",
+        "configure.ac",
+        "configure.in"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 315.0,
+        "y": 75.0,
+        "z": 0.0
+      },
+      "briefing": ""
+    },
+    {
+      "id": 5,
+      "parent_id": 4,
+      "path": "HomeworldSDL/Linux/stuff/config",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 1,
+      "subdir_count": 0,
+      "file_types": {
+        ".am": 1
+      },
+      "sample_files": [
+        "Makefile.am"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 480.0,
+        "y": 100.0,
+        "z": 0.0
+      },
+      "briefing": ""
+    },
+    {
+      "id": 6,
+      "parent_id": 1,
+      "path": "HomeworldSDL/Mac",
+      "depth": 2,
+      "sibling_idx": 2,
+      "file_count": 9,
+      "subdir_count": 2,
+      "file_types": {
+        ".md": 1,
+        ".entitlements": 2,
+        ".icns": 2,
+        ".plist": 2,
+        ".h": 1,
+        ".txt": 1
+      },
+      "sample_files": [
+        "BUILD.md",
+        "Homeworld.entitlements",
+        "Homeworld.icns",
+        "Homeworld.plist",
+        "Homeworld_Prefix.h",
+        "Raider Retreat.entitlements",
+        "RaiderRetreat.icns",
+        "RaiderRetreat.plist"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 23.4,
+        "y": 50.0,
+        "z": 132.9
+      },
+      "briefing": ""
+    },
+    {
+      "id": 7,
+      "parent_id": 6,
+      "path": "HomeworldSDL/Mac/Homeworld.xcodeproj",
+      "depth": 3,
+      "sibling_idx": 0,
+      "file_count": 1,
+      "subdir_count": 2,
+      "file_types": {
+        ".pbxproj": 1
+      },
+      "sample_files": [
+        "project.pbxproj"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 301.0,
+        "y": 75.0,
+        "z": 92.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 8,
+      "parent_id": 7,
+      "path": "HomeworldSDL/Mac/Homeworld.xcodeproj/project.xcworkspace",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 1,
+      "subdir_count": 2,
+      "file_types": {
+        ".xcworkspacedata": 1
+      },
+      "sample_files": [
+        "contents.xcworkspacedata"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 470.8,
+        "y": 100.0,
+        "z": 93.6
+      },
+      "briefing": ""
+    },
+    {
+      "id": 9,
+      "parent_id": 7,
+      "path": "HomeworldSDL/Mac/Homeworld.xcodeproj/xcshareddata",
+      "depth": 4,
+      "sibling_idx": 1,
+      "file_count": 0,
+      "subdir_count": 1,
+      "file_types": {},
+      "sample_files": [],
+      "ship_class": "scout",
+      "pos": {
+        "x": 443.5,
+        "y": 100.0,
+        "z": 183.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 10,
+      "parent_id": 6,
+      "path": "HomeworldSDL/Mac/en.lproj",
+      "depth": 3,
+      "sibling_idx": 1,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        ".strings": 2
+      },
+      "sample_files": [
+        "HomeworldPlist.strings",
+        "RaiderRetreatPlist.strings"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 260.3,
+        "y": 75.0,
+        "z": 177.4
+      },
+      "briefing": ""
+    },
+    {
+      "id": 11,
+      "parent_id": 1,
+      "path": "HomeworldSDL/Windows",
+      "depth": 2,
+      "sibling_idx": 3,
+      "file_count": 4,
+      "subdir_count": 2,
+      "file_types": {
+        ".txt": 2,
+        ".sln": 2
+      },
+      "sample_files": [
+        "building.txt",
+        "hwsdl.sln",
+        "readme.txt",
+        "vc8_hwsdl.sln"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -67.5,
+        "y": 50.0,
+        "z": 116.9
+      },
+      "briefing": ""
+    },
+    {
+      "id": 12,
+      "parent_id": 11,
+      "path": "HomeworldSDL/Windows/prj",
+      "depth": 3,
+      "sibling_idx": 0,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        ".vcproj": 2
+      },
+      "sample_files": [
+        "hwsdl.vcproj",
+        "vc8_hwsdl.vcproj"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 196.4,
+        "y": 75.0,
+        "z": 246.3
+      },
+      "briefing": ""
+    },
+    {
+      "id": 13,
+      "parent_id": 11,
+      "path": "HomeworldSDL/Windows/vc7obj",
+      "depth": 3,
+      "sibling_idx": 1,
+      "file_count": 0,
+      "subdir_count": 2,
+      "file_types": {},
+      "sample_files": [],
+      "ship_class": "scout",
+      "pos": {
+        "x": 115.1,
+        "y": 75.0,
+        "z": 293.2
+      },
+      "briefing": ""
+    },
+    {
+      "id": 14,
+      "parent_id": 13,
+      "path": "HomeworldSDL/Windows/vc7obj/deb",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        ".obj": 2
+      },
+      "sample_files": [
+        "BigFile.obj",
+        "File.obj"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 399.1,
+        "y": 100.0,
+        "z": 266.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 15,
+      "parent_id": 13,
+      "path": "HomeworldSDL/Windows/vc7obj/rel",
+      "depth": 4,
+      "sibling_idx": 1,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        ".obj": 2
+      },
+      "sample_files": [
+        "BigFile.obj",
+        "File.obj"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 339.4,
+        "y": 100.0,
+        "z": 339.4
+      },
+      "briefing": ""
+    },
+    {
+      "id": 16,
+      "parent_id": 1,
+      "path": "HomeworldSDL/documentation",
+      "depth": 2,
+      "sibling_idx": 4,
+      "file_count": 8,
+      "subdir_count": 2,
+      "file_types": {
+        ".txt": 5,
+        ".doc": 2,
+        ".rtf": 1
+      },
+      "sample_files": [
+        "Glossary.txt",
+        "HWSDL_enhancements.txt",
+        "MAD_animation_tutorial.doc",
+        "Music_editing_tutorial.doc",
+        "README.txt",
+        "btg-user-guide.rtf",
+        "coding_standards.txt",
+        "tasks.txt"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -126.9,
+        "y": 50.0,
+        "z": 46.2
+      },
+      "briefing": ""
+    },
+    {
+      "id": 17,
+      "parent_id": 16,
+      "path": "HomeworldSDL/documentation/File Formats",
+      "depth": 3,
+      "sibling_idx": 0,
+      "file_count": 5,
+      "subdir_count": 0,
+      "file_types": {
+        ".txt": 5
+      },
+      "sample_files": [
+        "BIG Specification.txt",
+        "GEO Specification.txt",
+        "LiF Specification.txt",
+        "MAD Specification.txt",
+        "MEX Specification.txt"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 23.5,
+        "y": 75.0,
+        "z": 314.1
+      },
+      "briefing": ""
+    },
+    {
+      "id": 18,
+      "parent_id": 16,
+      "path": "HomeworldSDL/documentation/Map Editing",
+      "depth": 3,
+      "sibling_idx": 1,
+      "file_count": 7,
+      "subdir_count": 0,
+      "file_types": {
+        ".txt": 7
+      },
+      "sample_files": [
+        "HW_Checklist.txt",
+        "HW_Edit_FAQ.txt",
+        "HW_Editing.txt",
+        "HW_Errors.txt",
+        "HW_Intro.txt",
+        "HW_Objects.txt",
+        "HW_Properties.txt"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -70.1,
+        "y": 75.0,
+        "z": 307.1
+      },
+      "briefing": ""
+    },
+    {
+      "id": 19,
+      "parent_id": 1,
+      "path": "HomeworldSDL/mingw",
+      "depth": 2,
+      "sibling_idx": 5,
+      "file_count": 3,
+      "subdir_count": 0,
+      "file_types": {
+        "": 1,
+        ".rc": 1,
+        ".ico": 1
+      },
+      "sample_files": [
+        "Makefile",
+        "hw.rc",
+        "hwsdl.ico"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -126.9,
+        "y": 50.0,
+        "z": -46.2
+      },
+      "briefing": ""
+    },
+    {
+      "id": 20,
+      "parent_id": 1,
+      "path": "HomeworldSDL/src",
+      "depth": 2,
+      "sibling_idx": 6,
+      "file_count": 3,
+      "subdir_count": 7,
+      "file_types": {
+        ".am": 1,
+        ".c": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "Makefile.am",
+        "homeworld.c",
+        "meson.build"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -67.5,
+        "y": 50.0,
+        "z": -116.9
+      },
+      "briefing": ""
+    },
+    {
+      "id": 21,
+      "parent_id": 20,
+      "path": "HomeworldSDL/src/Bridge",
+      "depth": 3,
+      "sibling_idx": 0,
+      "file_count": 3,
+      "subdir_count": 0,
+      "file_types": {
+        ".c": 1,
+        ".h": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "FleetBridge.c",
+        "FleetBridge.h",
+        "meson.build"
+      ],
+      "ship_class": "destroyer",
+      "pos": {
+        "x": -157.5,
+        "y": 75.0,
+        "z": 272.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 22,
+      "parent_id": 20,
+      "path": "HomeworldSDL/src/Game",
+      "depth": 3,
+      "sibling_idx": 1,
+      "file_count": 307,
+      "subdir_count": 0,
+      "file_types": {
+        ".c": 140,
+        ".h": 160,
+        ".bak": 3,
+        ".am": 1,
+        ".s": 1,
+        ".ini": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "AIAttackMan.c",
+        "AIAttackMan.h",
+        "AIDefenseMan.c",
+        "AIDefenseMan.h",
+        "AIEvents.c",
+        "AIEvents.h",
+        "AIFeatures.h",
+        "AIFleetMan.c"
+      ],
+      "ship_class": "support",
+      "pos": {
+        "x": -230.9,
+        "y": 75.0,
+        "z": 214.3
+      },
+      "briefing": ""
+    },
+    {
+      "id": 23,
+      "parent_id": 20,
+      "path": "HomeworldSDL/src/Missions",
+      "depth": 3,
+      "sibling_idx": 2,
+      "file_count": 1,
+      "subdir_count": 3,
+      "file_types": {
+        ".build": 1
+      },
+      "sample_files": [
+        "meson.build"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -283.8,
+        "y": 75.0,
+        "z": 136.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 24,
+      "parent_id": 23,
+      "path": "HomeworldSDL/src/Missions/Generated",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 1,
+      "subdir_count": 0,
+      "file_types": {
+        ".am": 1
+      },
+      "sample_files": [
+        "Makefile.am"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 266.7,
+        "y": 100.0,
+        "z": 399.1
+      },
+      "briefing": ""
+    },
+    {
+      "id": 25,
+      "parent_id": 23,
+      "path": "HomeworldSDL/src/Missions/SinglePlayer",
+      "depth": 4,
+      "sibling_idx": 1,
+      "file_count": 20,
+      "subdir_count": 0,
+      "file_types": {
+        ".kas": 17,
+        ".kash": 2,
+        ".build": 1
+      },
+      "sample_files": [
+        "Mission01.kas",
+        "Mission02.kas",
+        "Mission03.kas",
+        "Mission04.kas",
+        "Mission05.kas",
+        "Mission05_OEM.kas",
+        "Mission06.kas",
+        "Mission07.kas"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 183.7,
+        "y": 100.0,
+        "z": 443.5
+      },
+      "briefing": ""
+    },
+    {
+      "id": 26,
+      "parent_id": 23,
+      "path": "HomeworldSDL/src/Missions/Tutorials",
+      "depth": 4,
+      "sibling_idx": 2,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        ".kas": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "Tutorial1.kas",
+        "meson.build"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 93.6,
+        "y": 100.0,
+        "z": 470.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 27,
+      "parent_id": 20,
+      "path": "HomeworldSDL/src/SDL",
+      "depth": 3,
+      "sibling_idx": 3,
+      "file_count": 71,
+      "subdir_count": 0,
+      "file_types": {
+        ".cpp": 3,
+        ".h": 35,
+        ".am": 1,
+        ".c": 31,
+        ".build": 1
+      },
+      "sample_files": [
+        "ClientCDKey.cpp",
+        "ClientCDKey.h",
+        "Makefile.am",
+        "NetworkInterface.c",
+        "NetworkInterface.h",
+        "Queue.c",
+        "Queue.h",
+        "TimeoutTimer.c"
+      ],
+      "ship_class": "support",
+      "pos": {
+        "x": -311.5,
+        "y": 75.0,
+        "z": 46.9
+      },
+      "briefing": ""
+    },
+    {
+      "id": 28,
+      "parent_id": 20,
+      "path": "HomeworldSDL/src/Ships",
+      "depth": 3,
+      "sibling_idx": 4,
+      "file_count": 84,
+      "subdir_count": 0,
+      "file_types": {
+        ".c": 40,
+        ".h": 42,
+        ".am": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "AdvanceSupportFrigate.c",
+        "AdvanceSupportFrigate.h",
+        "Carrier.c",
+        "Carrier.h",
+        "CloakGenerator.c",
+        "CloakGenerator.h",
+        "DDDFrigate.c",
+        "DDDFrigate.h"
+      ],
+      "ship_class": "support",
+      "pos": {
+        "x": -311.5,
+        "y": 75.0,
+        "z": -46.9
+      },
+      "briefing": ""
+    },
+    {
+      "id": 29,
+      "parent_id": 20,
+      "path": "HomeworldSDL/src/ThirdParty",
+      "depth": 3,
+      "sibling_idx": 5,
+      "file_count": 2,
+      "subdir_count": 4,
+      "file_types": {
+        ".am": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "Makefile.am",
+        "meson.build"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -283.8,
+        "y": 75.0,
+        "z": -136.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 30,
+      "parent_id": 29,
+      "path": "HomeworldSDL/src/ThirdParty/CRC",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 4,
+      "subdir_count": 0,
+      "file_types": {
+        ".c": 1,
+        ".h": 1,
+        ".am": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "CRC32.c",
+        "CRC32.h",
+        "Makefile.am",
+        "meson.build"
+      ],
+      "ship_class": "destroyer",
+      "pos": {
+        "x": 0.0,
+        "y": 100.0,
+        "z": 480.0
+      },
+      "briefing": ""
+    },
+    {
+      "id": 31,
+      "parent_id": 29,
+      "path": "HomeworldSDL/src/ThirdParty/LZSS",
+      "depth": 4,
+      "sibling_idx": 1,
+      "file_count": 6,
+      "subdir_count": 0,
+      "file_types": {
+        ".c": 2,
+        ".h": 2,
+        ".am": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "BitIO.c",
+        "BitIO.h",
+        "LZSS.c",
+        "LZSS.h",
+        "Makefile.am",
+        "meson.build"
+      ],
+      "ship_class": "destroyer",
+      "pos": {
+        "x": -93.6,
+        "y": 100.0,
+        "z": 470.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 32,
+      "parent_id": 29,
+      "path": "HomeworldSDL/src/ThirdParty/Titan",
+      "depth": 4,
+      "sibling_idx": 2,
+      "file_count": 3,
+      "subdir_count": 0,
+      "file_types": {
+        ".am": 1,
+        ".h": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "Makefile.am",
+        "ServerStatus.h",
+        "meson.build"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -183.7,
+        "y": 100.0,
+        "z": 443.5
+      },
+      "briefing": ""
+    },
+    {
+      "id": 33,
+      "parent_id": 29,
+      "path": "HomeworldSDL/src/ThirdParty/stb",
+      "depth": 4,
+      "sibling_idx": 3,
+      "file_count": 3,
+      "subdir_count": 0,
+      "file_types": {
+        ".build": 1,
+        ".h": 2
+      },
+      "sample_files": [
+        "meson.build",
+        "stb_image.h",
+        "stb_image_write.h"
+      ],
+      "ship_class": "support",
+      "pos": {
+        "x": -266.7,
+        "y": 100.0,
+        "z": 399.1
+      },
+      "briefing": ""
+    },
+    {
+      "id": 34,
+      "parent_id": 20,
+      "path": "HomeworldSDL/src/obj",
+      "depth": 3,
+      "sibling_idx": 6,
+      "file_count": 9,
+      "subdir_count": 0,
+      "file_types": {
+        ".am": 1,
+        ".o": 4,
+        ".obj": 4
+      },
+      "sample_files": [
+        "Makefile.am",
+        "dct.o",
+        "dct.obj",
+        "fqcodec.o",
+        "fqcodec.obj",
+        "fqeffect.o",
+        "fqeffect.obj",
+        "fquant.o"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -230.9,
+        "y": 75.0,
+        "z": -214.3
+      },
+      "briefing": ""
+    },
+    {
+      "id": 35,
+      "parent_id": 1,
+      "path": "HomeworldSDL/subprojects",
+      "depth": 2,
+      "sibling_idx": 7,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        "": 1,
+        ".wrap": 1
+      },
+      "sample_files": [
+        ".gitignore",
+        "demo-assets.wrap"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 23.4,
+        "y": 50.0,
+        "z": -132.9
+      },
+      "briefing": ""
+    },
+    {
+      "id": 36,
+      "parent_id": 1,
+      "path": "HomeworldSDL/tools",
+      "depth": 2,
+      "sibling_idx": 8,
+      "file_count": 3,
+      "subdir_count": 10,
+      "file_types": {
+        ".am": 1,
+        ".txt": 1,
+        ".build": 1
+      },
+      "sample_files": [
+        "Makefile.am",
+        "README.txt",
+        "meson.build"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 103.4,
+        "y": 50.0,
+        "z": -86.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 37,
+      "parent_id": 36,
+      "path": "HomeworldSDL/tools/biggie",
+      "depth": 3,
+      "sibling_idx": 0,
+      "file_count": 5,
+      "subdir_count": 0,
+      "file_types": {
+        ".sh": 1,
+        ".c": 2,
+        ".build": 1,
+        ".h": 1
+      },
+      "sample_files": [
+        "biggie-Linux-compile.sh",
+        "main.c",
+        "meson.build",
+        "options.c",
+        "options.h"
+      ],
+      "ship_class": "destroyer",
+      "pos": {
+        "x": -157.5,
+        "y": 75.0,
+        "z": -272.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 38,
+      "parent_id": 36,
+      "path": "HomeworldSDL/tools/btg",
+      "depth": 3,
+      "sibling_idx": 1,
+      "file_count": 40,
+      "subdir_count": 1,
+      "file_types": {
+        ".cpp": 16,
+        ".h": 17,
+        ".dsp": 1,
+        ".rc": 1,
+        ".sln": 2,
+        ".vcproj": 2,
+        ".txt": 1
+      },
+      "sample_files": [
+        "BMPContainer.cpp",
+        "BMPContainer.h",
+        "BTG.cpp",
+        "BTG.dsp",
+        "BTG.h",
+        "BTG.rc",
+        "BTG.sln",
+        "BTG.vcproj"
+      ],
+      "ship_class": "support",
+      "pos": {
+        "x": -70.1,
+        "y": 75.0,
+        "z": -307.1
+      },
+      "briefing": ""
+    },
+    {
+      "id": 39,
+      "parent_id": 38,
+      "path": "HomeworldSDL/tools/btg/res",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 4,
+      "subdir_count": 0,
+      "file_types": {
+        ".ico": 2,
+        ".rc2": 1,
+        ".bmp": 1
+      },
+      "sample_files": [
+        "BTG.ico",
+        "BTG.rc2",
+        "BTGDoc.ico",
+        "Toolbar.bmp"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -339.4,
+        "y": 100.0,
+        "z": 339.4
+      },
+      "briefing": ""
+    },
+    {
+      "id": 40,
+      "parent_id": 36,
+      "path": "HomeworldSDL/tools/convertors",
+      "depth": 3,
+      "sibling_idx": 2,
+      "file_count": 8,
+      "subdir_count": 4,
+      "file_types": {
+        ".exe": 8
+      },
+      "sample_files": [
+        "3D+Exploration+(v1.7).exe",
+        "Convert+HW+to+HWC+models.exe",
+        "Crook's+Wavefront+Converter.exe",
+        "Crooks+HW+Font+Converter+v1.3.exe",
+        "MEX+scaler+tool.exe",
+        "RadTools+v0.8i.exe",
+        "Wavefront+Object+regrouper.exe",
+        "makeaifrx+sound+converter.exe"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 23.5,
+        "y": 75.0,
+        "z": -314.1
+      },
+      "briefing": ""
+    },
+    {
+      "id": 41,
+      "parent_id": 40,
+      "path": "HomeworldSDL/tools/convertors/3D+Exploration+(v1.2.5.4)",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 10,
+      "subdir_count": 2,
+      "file_types": {
+        ".chm": 1,
+        ".dll": 5,
+        ".exe": 1,
+        ".dat": 2,
+        ".htm": 1
+      },
+      "sample_files": [
+        "3d.chm",
+        "cw3230mt.dll",
+        "dxbmp32.dll",
+        "dxopengl.dll",
+        "explor3d.exe",
+        "favorite.dat",
+        "history.dat",
+        "object3d.dll"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -399.1,
+        "y": 100.0,
+        "z": 266.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 42,
+      "parent_id": 40,
+      "path": "HomeworldSDL/tools/convertors/AIFR+sound+encoder",
+      "depth": 4,
+      "sibling_idx": 1,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        ".txt": 1,
+        ".exe": 1
+      },
+      "sample_files": [
+        "Readme.txt",
+        "enc.exe"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -443.5,
+        "y": 100.0,
+        "z": 183.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 43,
+      "parent_id": 40,
+      "path": "HomeworldSDL/tools/convertors/Crook's+BTG+Creator+v2",
+      "depth": 4,
+      "sibling_idx": 2,
+      "file_count": 3,
+      "subdir_count": 1,
+      "file_types": {
+        ".exe": 1,
+        ".doc": 1,
+        ".bat": 1
+      },
+      "sample_files": [
+        "HW_BTG_Creator_2_0.exe",
+        "READMEPLEASE.doc",
+        "temp.bat"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -470.8,
+        "y": 100.0,
+        "z": 93.6
+      },
+      "briefing": ""
+    },
+    {
+      "id": 44,
+      "parent_id": 40,
+      "path": "HomeworldSDL/tools/convertors/Turret+Tools+(v1.1)",
+      "depth": 4,
+      "sibling_idx": 3,
+      "file_count": 6,
+      "subdir_count": 0,
+      "file_types": {
+        ".exe": 4,
+        ".txt": 2
+      },
+      "sample_files": [
+        "peochain.exe",
+        "peodupe.exe",
+        "peoinfo.exe",
+        "peomatrix.exe",
+        "readme.txt",
+        "turrettools.txt"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -480.0,
+        "y": 100.0,
+        "z": 0.0
+      },
+      "briefing": ""
+    },
+    {
+      "id": 45,
+      "parent_id": 36,
+      "path": "HomeworldSDL/tools/editors",
+      "depth": 3,
+      "sibling_idx": 3,
+      "file_count": 0,
+      "subdir_count": 7,
+      "file_types": {},
+      "sample_files": [],
+      "ship_class": "scout",
+      "pos": {
+        "x": 115.1,
+        "y": 75.0,
+        "z": -293.2
+      },
+      "briefing": ""
+    },
+    {
+      "id": 46,
+      "parent_id": 45,
+      "path": "HomeworldSDL/tools/editors/cinematic",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 0,
+      "subdir_count": 1,
+      "file_types": {},
+      "sample_files": [],
+      "ship_class": "scout",
+      "pos": {
+        "x": -470.8,
+        "y": 100.0,
+        "z": -93.6
+      },
+      "briefing": ""
+    },
+    {
+      "id": 47,
+      "parent_id": 45,
+      "path": "HomeworldSDL/tools/editors/hwse_and_other_delphy_tools",
+      "depth": 4,
+      "sibling_idx": 1,
+      "file_count": 6,
+      "subdir_count": 0,
+      "file_types": {
+        ".ocx": 2,
+        ".btg": 1,
+        ".exe": 2,
+        ".bas": 1
+      },
+      "sample_files": [
+        "dlphyThumbs.ocx",
+        "ez01.btg",
+        "hwse141.exe",
+        "modLifFunctions.bas",
+        "rlc_sound_tools.exe",
+        "rmcontrol.ocx"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -443.5,
+        "y": 100.0,
+        "z": -183.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 48,
+      "parent_id": 45,
+      "path": "HomeworldSDL/tools/editors/misc",
+      "depth": 4,
+      "sibling_idx": 2,
+      "file_count": 0,
+      "subdir_count": 1,
+      "file_types": {},
+      "sample_files": [],
+      "ship_class": "scout",
+      "pos": {
+        "x": -399.1,
+        "y": 100.0,
+        "z": -266.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 49,
+      "parent_id": 45,
+      "path": "HomeworldSDL/tools/editors/model",
+      "depth": 4,
+      "sibling_idx": 3,
+      "file_count": 1,
+      "subdir_count": 1,
+      "file_types": {
+        ".exe": 1
+      },
+      "sample_files": [
+        "PEOAutolodder_v1_1.exe"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -339.4,
+        "y": 100.0,
+        "z": -339.4
+      },
+      "briefing": ""
+    },
+    {
+      "id": 50,
+      "parent_id": 45,
+      "path": "HomeworldSDL/tools/editors/shipspecific",
+      "depth": 4,
+      "sibling_idx": 4,
+      "file_count": 2,
+      "subdir_count": 3,
+      "file_types": {
+        ".exe": 2
+      },
+      "sample_files": [
+        "MEX+editor+for+HW+Cataclysm.exe",
+        "madeditor166.exe"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -266.7,
+        "y": 100.0,
+        "z": -399.1
+      },
+      "briefing": ""
+    },
+    {
+      "id": 51,
+      "parent_id": 45,
+      "path": "HomeworldSDL/tools/editors/sound",
+      "depth": 4,
+      "sibling_idx": 5,
+      "file_count": 3,
+      "subdir_count": 1,
+      "file_types": {
+        ".exe": 2,
+        ".ini": 1
+      },
+      "sample_files": [
+        "BNK+sound+bank+editor.exe",
+        "INI+for+BNK+editor.ini",
+        "WXH+Music+Editor.exe"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -183.7,
+        "y": 100.0,
+        "z": -443.5
+      },
+      "briefing": ""
+    },
+    {
+      "id": 52,
+      "parent_id": 45,
+      "path": "HomeworldSDL/tools/editors/texture",
+      "depth": 4,
+      "sibling_idx": 6,
+      "file_count": 0,
+      "subdir_count": 3,
+      "file_types": {},
+      "sample_files": [],
+      "ship_class": "scout",
+      "pos": {
+        "x": -93.6,
+        "y": 100.0,
+        "z": -470.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 53,
+      "parent_id": 36,
+      "path": "HomeworldSDL/tools/kas2c",
+      "depth": 3,
+      "sibling_idx": 4,
+      "file_count": 8,
+      "subdir_count": 0,
+      "file_types": {
+        ".am": 1,
+        ".txt": 1,
+        ".sh": 1,
+        ".c": 1,
+        ".h": 1,
+        ".l": 1,
+        ".build": 1,
+        ".y": 1
+      },
+      "sample_files": [
+        "Makefile.am",
+        "README.txt",
+        "kas2c-macOS-compile.sh",
+        "kas2c.c",
+        "kas2c.h",
+        "lexer.l",
+        "meson.build",
+        "parser.y"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 196.4,
+        "y": 75.0,
+        "z": -246.3
+      },
+      "briefing": ""
+    },
+    {
+      "id": 54,
+      "parent_id": 36,
+      "path": "HomeworldSDL/tools/liflist",
+      "depth": 3,
+      "sibling_idx": 5,
+      "file_count": 14,
+      "subdir_count": 1,
+      "file_types": {
+        ".mdp": 1,
+        ".c": 5,
+        ".h": 4,
+        ".exe": 1,
+        ".mak": 1,
+        ".ncb": 1,
+        ".ll": 1
+      },
+      "sample_files": [
+        "LIFLIST.MDP",
+        "Quantize.c",
+        "Quantize.h",
+        "layerimg.c",
+        "layerimg.h",
+        "liflist.c",
+        "liflist.exe",
+        "liflist.mak"
+      ],
+      "ship_class": "destroyer",
+      "pos": {
+        "x": 260.3,
+        "y": 75.0,
+        "z": -177.4
+      },
+      "briefing": ""
+    },
+    {
+      "id": 55,
+      "parent_id": 54,
+      "path": "HomeworldSDL/tools/liflist/Liflist+removal+file",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        ".mif": 2
+      },
+      "sample_files": [
+        "r1removal.mif",
+        "r2removal.mif"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": -0.0,
+        "y": 100.0,
+        "z": -480.0
+      },
+      "briefing": ""
+    },
+    {
+      "id": 56,
+      "parent_id": 36,
+      "path": "HomeworldSDL/tools/miscellaneous",
+      "depth": 3,
+      "sibling_idx": 6,
+      "file_count": 2,
+      "subdir_count": 9,
+      "file_types": {
+        ".exe": 2
+      },
+      "sample_files": [
+        "BNKExtractor.exe",
+        "Crook's+HW+Font+viewer.exe"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 301.0,
+        "y": 75.0,
+        "z": -92.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 57,
+      "parent_id": 56,
+      "path": "HomeworldSDL/tools/miscellaneous/BigViewer3",
+      "depth": 4,
+      "sibling_idx": 0,
+      "file_count": 2,
+      "subdir_count": 0,
+      "file_types": {
+        ".exe": 1,
+        ".txt": 1
+      },
+      "sample_files": [
+        "BigViewer.exe",
+        "Readme.txt"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 93.6,
+        "y": 100.0,
+        "z": -470.8
+      },
+      "briefing": ""
+    },
+    {
+      "id": 58,
+      "parent_id": 56,
+      "path": "HomeworldSDL/tools/miscellaneous/Crook's+RGB+to+EBG+conversion",
+      "depth": 4,
+      "sibling_idx": 1,
+      "file_count": 1,
+      "subdir_count": 0,
+      "file_types": {
+        ".exe": 1
+      },
+      "sample_files": [
+        "RGBTOEBG.exe"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 183.7,
+        "y": 100.0,
+        "z": -443.5
+      },
+      "briefing": ""
+    },
+    {
+      "id": 59,
+      "parent_id": 56,
+      "path": "HomeworldSDL/tools/miscellaneous/FEMAN+Front+End+Manager",
+      "depth": 4,
+      "sibling_idx": 2,
+      "file_count": 5,
+      "subdir_count": 1,
+      "file_types": {
+        ".exe": 2,
+        ".doc": 1,
+        ".bat": 1,
+        ".txt": 1
+      },
+      "sample_files": [
+        "FEMan.exe",
+        "FEManLocalize.doc",
+        "MakeFEMan.bat",
+        "liflist.exe",
+        "readme.txt"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 266.7,
+        "y": 100.0,
+        "z": -399.1
+      },
+      "briefing": ""
+    },
+    {
+      "id": 60,
+      "parent_id": 56,
+      "path": "HomeworldSDL/tools/miscellaneous/Map+Maker",
+      "depth": 4,
+      "sibling_idx": 3,
+      "file_count": 2,
+      "subdir_count": 1,
+      "file_types": {
+        ".bat": 1,
+        ".sh": 1
+      },
+      "sample_files": [
+        "MapMaker.bat",
+        "MapMaker.sh"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 339.4,
+        "y": 100.0,
+        "z": -339.4
+      },
+      "briefing": ""
+    },
+    {
+      "id": 61,
+      "parent_id": 56,
+      "path": "HomeworldSDL/tools/miscellaneous/Misc+Lif+tools+(HwToolz)",
+      "depth": 4,
+      "sibling_idx": 4,
+      "file_count": 3,
+      "subdir_count": 0,
+      "file_types": {
+        ".cab": 1,
+        ".lst": 1,
+        ".exe": 1
+      },
+      "sample_files": [
+        "HwToolz.CAB",
+        "Setup.Lst",
+        "setup.exe"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 399.1,
+        "y": 100.0,
+        "z": -266.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 62,
+      "parent_id": 56,
+      "path": "HomeworldSDL/tools/miscellaneous/ModMan+5.1",
+      "depth": 4,
+      "sibling_idx": 5,
+      "file_count": 5,
+      "subdir_count": 0,
+      "file_types": {
+        ".doc": 1,
+        ".exe": 2,
+        ".ini": 1,
+        ".txt": 1
+      },
+      "sample_files": [
+        "Ini file settings.doc",
+        "mmsetup.exe",
+        "modman.exe",
+        "modman.ini",
+        "readme.txt"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 443.5,
+        "y": 100.0,
+        "z": -183.7
+      },
+      "briefing": ""
+    },
+    {
+      "id": 63,
+      "parent_id": 56,
+      "path": "HomeworldSDL/tools/miscellaneous/VB+Core+files+for+HwToolz",
+      "depth": 4,
+      "sibling_idx": 6,
+      "file_count": 3,
+      "subdir_count": 0,
+      "file_types": {
+        ".cab": 1,
+        ".exe": 1,
+        ".lst": 1
+      },
+      "sample_files": [
+        "HwToolzVBCore.CAB",
+        "SETUP.EXE",
+        "SETUP.LST"
+      ],
+      "ship_class": "scout",
+      "pos": {
+        "x": 470.8,
+        "y": 100.0,
+        "z": -93.6
+      },
+      "briefing": ""
+    }
+  ]
+}
