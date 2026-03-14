@@ -7,11 +7,17 @@ from ships.collector  import CollectorShip
 from ships.researcher import ResearcherShip
 from ships.destroyer  import DestroyerShip
 from ships.scout      import ScoutShip
+from ships.carrier    import CarrierShip
+from ships.minelayer  import MinelayerShip
+from ships.salvage    import SalvageShip
 
 LIMITS = {
     "collector":  MAX_COLLECTORS,
     "researcher": MAX_RESEARCHERS,
     "destroyer":  MAX_DESTROYERS,
+    "carrier":    3,
+    "minelayer":  4,
+    "salvage":    3,
     "scout":      8,
     "support":    4,
 }
@@ -21,6 +27,9 @@ SHIP_CLASSES = {
     "researcher": ResearcherShip,
     "destroyer":  DestroyerShip,
     "scout":      ScoutShip,
+    "carrier":    CarrierShip,
+    "minelayer":  MinelayerShip,
+    "salvage":    SalvageShip,
 }
 
 

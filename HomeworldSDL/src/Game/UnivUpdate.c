@@ -7303,6 +7303,24 @@ bool32 univUpdate(real32 phystimeelapsed)
         static int bridgeReady = 0;
         if (!bridgeReady) { bridgeInit(); bridgeReady = 1; }
         bridgeTick(universe.curPlayerPtr ? universe.curPlayerPtr->resourceUnits : 0);
+
+        /* Phase 5: log agent fleet changes to stdout */
+        {
+            FleetState *fs = bridgeGetState();
+            if (fs->valid && fs->ship_count > 0)
+            {
+                static int lastShipCount = -1;
+                if (fs->ship_count != lastShipCount)
+                {
+                    lastShipCount = fs->ship_count;
+                    printf("[Bridge] Fleet: %d agents | obj: %s\n",
+                           fs->ship_count, fs->objective[0] ? fs->objective : "(none)");
+                    for (int i = 0; i < fs->ship_count; i++)
+                        printf("  [%s] type=%-12s status=%s\n",
+                               fs->ships[i].id, fs->ships[i].type, fs->ships[i].status);
+                }
+            }
+        }
     }
 
     if ((autoSaveDebug) && (UNIVERSE_WOODPECKER(31, 0)))    // every 2s

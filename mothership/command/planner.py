@@ -13,6 +13,9 @@ Ship classes and their real-world roles:
 - researcher:   LLM synthesis / analysis agent
 - scout:        lightweight trend monitoring agent
 - destroyer:    report generation / output writing agent
+- carrier:      sub-orchestrator managing a sector with its own micro-fleet
+- minelayer:    test generation agent (lays pytest "mines")
+- salvage:      structured data extraction from hostile/unstructured formats
 - support:      memory relay / context passing agent
 
 Respond ONLY with valid JSON in this exact format:
@@ -23,8 +26,13 @@ Respond ONLY with valid JSON in this exact format:
 }
 """
 
+
 def decide(user_message: str = "") -> dict:
-    client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    from ships.tactics import get_params, get_current
+
+    client         = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    params         = get_params()
+    tactic         = get_current()
 
     ru_balance     = store.get("ru_balance", 0)
     active_agents  = store.get("active_agents", [])
@@ -37,6 +45,7 @@ Fleet state:
 - Active agents: {active_agents}
 - Current objective: {objective}
 - Findings in memory: {findings_count}
+- Current tactic: {tactic} (temperature {params['temperature']})
 
 Commander message: {user_message if user_message else '(none — routine tick)'}
 
@@ -45,6 +54,7 @@ Issue the next build order.
     response = client.messages.create(
         model=config.MOTHERSHIP_MODEL,
         max_tokens=256,
+        temperature=params["temperature"],
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_context}]
     )

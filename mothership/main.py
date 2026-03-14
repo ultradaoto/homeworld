@@ -32,19 +32,24 @@ ASCII_BANNER = """[bold purple]
 
 HELP_TEXT = """[dim]
 Commands:
-  status          — show fleet status panel
-  ru <N>          — deposit N resource units to agent fleet
-  sync            — sync agent RU balance from live game
-  obj <text>      — set current objective
-  harvest <url>   — scrape a URL, deposit RUs, save to outputs/
-  research        — synthesize recent harvests into a report
-  destroy         — produce polished briefing from research
-  dashboard       — live fleet status display (15 sec)
-  outputs         — list all files in outputs/
-  read <file>     — read an output file (rendered markdown)
-  cmd <json>      — send raw command to C engine (e.g. cmd {"type":"add_ru","amount":500})
-  exit / quit     — shut down
-  <anything else> — routed to Command Layer (planning LLM)
+  status                               — show fleet status panel
+  ru <N>                               — deposit N resource units to agent fleet
+  sync                                 — sync agent RU balance from live game
+  obj <text>                           — set current objective
+  tactic <aggressive|neutral|evasive>  — set fleet generation tactic
+  harvest <url>                        — scrape a URL, deposit RUs, save to outputs/
+  research                             — synthesize recent harvests into a report
+  destroy                              — produce polished briefing from research
+  carrier <sector> [objective]         — deploy sub-orchestrator to sector
+  sphere                               — 3-agent swarm verification
+  mine <code>                          — lay test mines for given code
+  salvage <url>                        — capture + structure hostile data
+  dashboard                            — live fleet status display (15 sec)
+  outputs                              — list all files in outputs/
+  read <file>                          — read an output file (rendered markdown)
+  cmd <json>                           — send raw command to C engine
+  exit / quit                          — shut down
+  <anything else>                      — routed to Command Layer (planning LLM)
 [/dim]"""
 
 
@@ -193,6 +198,52 @@ def handle_command(msg: str) -> bool:
             console.print(f"[green]Command sent to engine: {raw}[/green]")
         except Exception as e:
             console.print(f"[red]cmd error: {e}[/red]")
+        return True
+
+    if lower.startswith("tactic "):
+        from ships.tactics import set_tactic, get_current
+        name = msg[7:].strip().lower()
+        set_tactic(name)
+        console.print(f"[green]Fleet tactic set: {get_current()}[/green]")
+        return True
+
+    if lower.startswith("carrier "):
+        parts     = msg[8:].strip().split(" ", 1)
+        sector    = parts[0]
+        task_obj  = parts[1] if len(parts) > 1 else store.get("current_objective", "")
+        from ships.carrier import CarrierShip
+        aid  = f"carrier_{uuid.uuid4().hex[:6]}"
+        ship = CarrierShip(aid)
+        console.print(f"[green]Deploying Carrier to sector: {sector}[/green]")
+        result = asyncio.run(ship.run({"sector": sector, "objective": task_obj}))
+        console.print(f"[bold]Result:[/bold] {result}")
+        return True
+
+    if lower == "sphere":
+        from ships.sphere import sphere_verify
+        console.print("[green]Launching sphere formation (3 researchers)...[/green]")
+        result = asyncio.run(sphere_verify(n=3))
+        console.print(f"[bold]Winner:[/bold] {result.get('reason', result)}")
+        return True
+
+    if lower.startswith("mine "):
+        from ships.minelayer import MinelayerShip
+        code = msg[5:].strip()
+        aid  = f"minelayer_{uuid.uuid4().hex[:6]}"
+        ship = MinelayerShip(aid)
+        console.print("[green]Minelayer deploying...[/green]")
+        result = asyncio.run(ship.run({"code": code, "module": "user_input"}))
+        console.print(f"[bold]Mines laid:[/bold] {result}")
+        return True
+
+    if lower.startswith("salvage "):
+        from ships.salvage import SalvageShip
+        url  = msg[8:].strip()
+        aid  = f"salvage_{uuid.uuid4().hex[:6]}"
+        ship = SalvageShip(aid)
+        console.print(f"[green]Salvage Corvette deploying → {url}[/green]")
+        result = asyncio.run(ship.run({"url": url, "label": "capture"}))
+        console.print(f"[bold]Salvage result:[/bold] {result}")
         return True
 
     if lower.startswith("read "):
