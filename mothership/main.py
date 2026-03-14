@@ -2,6 +2,8 @@
 import sys
 import os
 import json
+import uuid
+import asyncio
 import datetime
 
 from rich.console import Console
@@ -12,6 +14,8 @@ import config
 from memory import store
 from command import planner
 from router  import dispatcher
+from ships.collector  import CollectorShip
+from ships.researcher import ResearcherShip
 
 console = Console()
 
@@ -22,7 +26,7 @@ ASCII_BANNER = """[bold purple]
   ██╔══██║██║   ██║██║╚██╔╝██║██╔══╝  ██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║
   ██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗╚███╔███╔╝╚██████╔╝██║  ██║███████╗██████╔╝
   ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝
-[/bold purple][dim]  MOTHERSHIP COMMAND INTERFACE  ·  Fleet Management System  ·  Phase 1[/dim]
+[/bold purple][dim]  MOTHERSHIP COMMAND INTERFACE  ·  Fleet Management System  ·  Phase 2[/dim]
 """
 
 HELP_TEXT = """[dim]
@@ -30,6 +34,8 @@ Commands:
   status          — show fleet status panel
   ru <N>          — deposit N resource units
   obj <text>      — set current objective
+  harvest <url>   — scrape a URL, deposit RUs, save to outputs/
+  research        — synthesize recent harvests into a report
   exit / quit     — shut down
   <anything else> — routed to Command Layer (planning LLM)
 [/dim]"""
@@ -103,6 +109,23 @@ def handle_command(msg: str) -> bool:
         console.print(f"[green]Objective set: {obj}[/green]")
         return True
 
+    if lower.startswith("harvest "):
+        url      = msg[8:].strip()
+        agent_id = f"collector_{uuid.uuid4().hex[:6]}"
+        ship     = CollectorShip(agent_id)
+        console.print(f"[green]Dispatching collector → {url}[/green]")
+        result = asyncio.run(ship.run({"url": url}))
+        console.print(f"[bold]Result:[/bold] {result}")
+        return True
+
+    if lower == "research":
+        agent_id = f"researcher_{uuid.uuid4().hex[:6]}"
+        ship     = ResearcherShip(agent_id)
+        console.print("[green]Dispatching researcher...[/green]")
+        result = asyncio.run(ship.run({}))
+        console.print(f"[bold]Result:[/bold] {result}")
+        return True
+
     return False
 
 
@@ -129,7 +152,7 @@ def send_to_command_layer(msg: str):
     console.print(f"[bold]Router:[/bold] {result}")
 
     os.makedirs(config.OUTPUT_DIR, exist_ok=True)
-    ts       = datetime.datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+    ts       = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
     out_path = os.path.join(config.OUTPUT_DIR, f"order_{ts}.json")
     with open(out_path, "w") as f:
         json.dump({

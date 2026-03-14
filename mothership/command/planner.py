@@ -1,9 +1,7 @@
 import json
 import anthropic
-from config import ANTHROPIC_API_KEY, MOTHERSHIP_MODEL
+import config
 from memory import store
-
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
 
 SYSTEM_PROMPT = """
 You are the Mothership command intelligence of a Homeworld-inspired
@@ -26,6 +24,8 @@ Respond ONLY with valid JSON in this exact format:
 """
 
 def decide(user_message: str = "") -> dict:
+    client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+
     ru_balance     = store.get("ru_balance", 0)
     active_agents  = store.get("active_agents", [])
     objective      = store.get("current_objective", "awaiting orders")
@@ -43,9 +43,15 @@ Commander message: {user_message if user_message else '(none — routine tick)'}
 Issue the next build order.
 """
     response = client.messages.create(
-        model=MOTHERSHIP_MODEL,
+        model=config.MOTHERSHIP_MODEL,
         max_tokens=256,
         system=SYSTEM_PROMPT,
         messages=[{"role": "user", "content": user_context}]
     )
-    return json.loads(response.content[0].text)
+    text = response.content[0].text.strip()
+    if text.startswith("```"):
+        text = text.split("```", 2)[1]          # drop opening fence
+        if text.startswith("json"):
+            text = text[4:]                     # drop language tag
+        text = text.rsplit("```", 1)[0].strip() # drop closing fence
+    return json.loads(text)
