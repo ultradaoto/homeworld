@@ -82,6 +82,7 @@ def show_fleet_status():
     fleet_str = ("  ".join(f"{t}×{n}" for t, n in counts.items())
                  if counts else "[dim]no active agents[/dim]")
 
+    scout_str = ""
     engine = _get_engine_state()
     if engine:
         game_ru    = engine.get("ru_balance", 0)
