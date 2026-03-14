@@ -27,13 +27,14 @@ ASCII_BANNER = """[bold purple]
   ██╔══██║██║   ██║██║╚██╔╝██║██╔══╝  ██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║
   ██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗╚███╔███╔╝╚██████╔╝██║  ██║███████╗██████╔╝
   ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝
-[/bold purple][dim]  MOTHERSHIP COMMAND INTERFACE  ·  Fleet Management System  ·  Phase 3[/dim]
+[/bold purple][dim]  MOTHERSHIP COMMAND INTERFACE  ·  Fleet Management System  ·  Phase 4[/dim]
 """
 
 HELP_TEXT = """[dim]
 Commands:
   status          — show fleet status panel
-  ru <N>          — deposit N resource units
+  ru <N>          — deposit N resource units to agent fleet
+  sync            — sync agent RU balance from live game
   obj <text>      — set current objective
   harvest <url>   — scrape a URL, deposit RUs, save to outputs/
   research        — synthesize recent harvests into a report
@@ -45,6 +46,15 @@ Commands:
   exit / quit     — shut down
   <anything else> — routed to Command Layer (planning LLM)
 [/dim]"""
+
+
+def _get_engine_state():
+    """Returns engine state dict if game is connected, else None."""
+    try:
+        from bridge.state_file import read_engine_state
+        return read_engine_state()
+    except Exception:
+        return None
 
 
 def show_fleet_status():
@@ -60,8 +70,16 @@ def show_fleet_status():
     fleet_str = ("  ".join(f"{t}×{n}" for t, n in counts.items())
                  if counts else "[dim]no active agents[/dim]")
 
+    engine = _get_engine_state()
+    if engine:
+        game_ru   = engine.get("ru_balance", 0)
+        conn_line = f"[bold green]GAME: CONNECTED[/bold green]  |  [bold]Game RU:[/bold] {game_ru}"
+    else:
+        conn_line = "[bold red]GAME: OFFLINE[/bold red]  [dim](launch Homeworld to connect)[/dim]"
+
     console.print(Panel(
-        f"[bold]RU Balance:[/bold] {ru}  |  [bold]Findings:[/bold] {findings}\n"
+        f"{conn_line}\n"
+        f"[bold]Agent RU:[/bold]   {ru}  |  [bold]Findings:[/bold] {findings}\n"
         f"[bold]Objective:[/bold]  {obj}\n"
         f"[bold]Fleet:[/bold]      {fleet_str}",
         title="[bold purple]Fleet Status[/bold purple]",
@@ -101,12 +119,26 @@ def handle_command(msg: str) -> bool:
 
     if lower.startswith("ru "):
         try:
-            amount  = int(msg.split()[1])
-            current = store.get("ru_balance", 0)
-            store.set("ru_balance", current + amount)
-            console.print(f"[green]+{amount} RUs deposited. Balance: {current + amount}[/green]")
+            amount = int(msg.split()[1])
         except (IndexError, ValueError):
             console.print("[red]Usage: ru <number>[/red]")
+            return True
+        engine = _get_engine_state()
+        if not engine:
+            console.print("[yellow]Game not connected — RUs tracked locally only.[/yellow]")
+        current = store.get("ru_balance", 0)
+        store.set("ru_balance", current + amount)
+        console.print(f"[green]+{amount} RUs deposited. Agent balance: {current + amount}[/green]")
+        return True
+
+    if lower == "sync":
+        engine = _get_engine_state()
+        if not engine:
+            console.print("[red]Game not connected — cannot sync.[/red]")
+        else:
+            game_ru = engine.get("ru_balance", 0)
+            store.set("ru_balance", game_ru)
+            console.print(f"[green]Agent RU synced from game: {game_ru}[/green]")
         return True
 
     if lower.startswith("obj "):

@@ -1,6 +1,7 @@
 /* FleetBridge.c
- * Dependency-free JSON state reader for the Python Mothership bridge.
- * Polls fleet_state.json at most once per second.
+ * Dependency-free bidirectional JSON bridge for the Python Mothership.
+ * Reads fleet_state.json (Python → C) and writes engine_state.json (C → Python)
+ * at most once per second.
  */
 #include "FleetBridge.h"
 
@@ -9,14 +10,13 @@
 #include <string.h>
 #include <time.h>
 
-static FleetState gState   = {0};
-static time_t     gLastRead = 0;
+static FleetState gState    = {0};
+static time_t     gLastTick = 0;
 
 /* -----------------------------------------------------------------------
- * Minimal JSON helpers — only what we need, no full parser required.
+ * Minimal JSON helpers
  * ----------------------------------------------------------------------- */
 
-/* Copy the string value for `key` into `out` (NUL-terminated, max outLen). */
 static int jsonGetString(const char *json, const char *key,
                          char *out, int outLen)
 {
@@ -38,7 +38,6 @@ static int jsonGetString(const char *json, const char *key,
     return 1;
 }
 
-/* Read the integer value for `key` into `*out`. */
 static int jsonGetInt(const char *json, const char *key, int *out)
 {
     char search[72];
@@ -55,6 +54,28 @@ static int jsonGetInt(const char *json, const char *key, int *out)
 }
 
 /* -----------------------------------------------------------------------
+ * Write engine state for Python TUI to read
+ * ----------------------------------------------------------------------- */
+
+static void bridgeWriteEngineState(int gameRU)
+{
+    /* Atomic write: tmp file then rename */
+    char tmp[256];
+    snprintf(tmp, sizeof(tmp), "%s.tmp", BRIDGE_ENGINE_FILE);
+
+    FILE *f = fopen(tmp, "w");
+    if (!f) return;
+
+    fprintf(f, "{\"ru_balance\":%d,\"game_active\":1,\"timestamp\":%.0f}\n",
+            gameRU, (double)time(NULL));
+    fclose(f);
+
+    /* rename() is atomic on POSIX; on Windows it overwrites if dest exists */
+    remove(BRIDGE_ENGINE_FILE);
+    rename(tmp, BRIDGE_ENGINE_FILE);
+}
+
+/* -----------------------------------------------------------------------
  * Public API
  * ----------------------------------------------------------------------- */
 
@@ -63,12 +84,16 @@ void bridgeInit(void)
     memset(&gState, 0, sizeof(gState));
 }
 
-void bridgeTick(void)
+void bridgeTick(int gameRU)
 {
     time_t now = time(NULL);
-    if (now - gLastRead < 1) return;   /* poll at most once per second */
-    gLastRead = now;
+    if (now - gLastTick < 1) return;   /* at most once per second */
+    gLastTick = now;
 
+    /* --- C → Python: write current game state --- */
+    bridgeWriteEngineState(gameRU);
+
+    /* --- Python → C: read agent fleet state --- */
     FILE *f = fopen(BRIDGE_STATE_FILE, "r");
     if (!f) { gState.valid = 0; return; }
 
@@ -76,7 +101,7 @@ void bridgeTick(void)
     long len = ftell(f);
     rewind(f);
 
-    if (len <= 0 || len > 65536) { fclose(f); return; }   /* sanity cap */
+    if (len <= 0 || len > 65536) { fclose(f); return; }
 
     char *buf = (char *)malloc((size_t)len + 1);
     if (!buf) { fclose(f); return; }
@@ -89,7 +114,6 @@ void bridgeTick(void)
     jsonGetInt(buf, "findings",   &gState.findings);
     jsonGetString(buf, "objective", gState.objective, BRIDGE_MAX_OBJ);
 
-    /* Parse ships array — scan for { objects inside the "ships" array */
     gState.ship_count = 0;
     const char *arr = strstr(buf, "\"ships\"");
     if (arr)
@@ -136,9 +160,8 @@ void bridgeProcessCommand(void)
     fread(buf, 1, (size_t)len, f);
     buf[len] = '\0';
     fclose(f);
-    remove(BRIDGE_CMD_FILE);   /* consume — one-shot */
+    remove(BRIDGE_CMD_FILE);
 
-    /* Handle add_ru command: {"type":"add_ru","amount":500} */
     if (strstr(buf, "add_ru"))
     {
         int amount = 0;

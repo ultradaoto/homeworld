@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "FleetBridge.h"
 #include "CommandDefs.h"
 #include "Debug.h"
 #include "FEColour.h"
@@ -1335,21 +1334,6 @@ void tbRUs(featom *atom, regionhandle region)
     fontPrintf(region->rect.x1 - width - TB_RUMarginRight,
                (region->rect.y1 - region->rect.y0 - fontHeight(NULL)) / 2 + region->rect.y0,
                atom->borderColor, "%d", universe.curPlayerPtr->resourceUnits);
-
-    /* Karan Bridge — show Python fleet RUs and agent count below game counter */
-    {
-        FleetState *fs = bridgeGetState();
-        if (fs->valid && (fs->ru_balance > 0 || fs->ship_count > 0))
-        {
-            char bridgeStr[48];
-            snprintf(bridgeStr, sizeof(bridgeStr), "AI: %d RU  [%d]",
-                     fs->ru_balance, fs->ship_count);
-            sdword bridgeWidth = fontWidthf("%s", bridgeStr);
-            fontPrintf(region->rect.x1 - bridgeWidth - TB_RUMarginRight,
-                       (region->rect.y1 - region->rect.y0 - fontHeight(NULL)) / 2 + region->rect.y0 + fontHeight(NULL) + 2,
-                       colRGB(100, 200, 255), "%s", bridgeStr);
-        }
-    }
 
     fontMakeCurrent(oldfont);
 }

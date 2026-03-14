@@ -7302,7 +7302,7 @@ bool32 univUpdate(real32 phystimeelapsed)
     {
         static int bridgeReady = 0;
         if (!bridgeReady) { bridgeInit(); bridgeReady = 1; }
-        bridgeTick();
+        bridgeTick(universe.curPlayerPtr ? universe.curPlayerPtr->resourceUnits : 0);
     }
 
     if ((autoSaveDebug) && (UNIVERSE_WOODPECKER(31, 0)))    // every 2s
