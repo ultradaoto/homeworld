@@ -9,9 +9,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 static FleetState gState    = {0};
 static time_t     gLastTick = 0;
+
+/* Resolved absolute paths — set once in bridgeInit() */
+static char gStateFile [512] = BRIDGE_STATE_FILE;
+static char gEngineFile[512] = BRIDGE_ENGINE_FILE;
+static char gCmdFile   [512] = BRIDGE_CMD_FILE;
 
 /* -----------------------------------------------------------------------
  * Minimal JSON helpers
@@ -60,8 +68,8 @@ static int jsonGetInt(const char *json, const char *key, int *out)
 static void bridgeWriteEngineState(int gameRU)
 {
     /* Atomic write: tmp file then rename */
-    char tmp[256];
-    snprintf(tmp, sizeof(tmp), "%s.tmp", BRIDGE_ENGINE_FILE);
+    char tmp[520];
+    snprintf(tmp, sizeof(tmp), "%s.tmp", gEngineFile);
 
     FILE *f = fopen(tmp, "w");
     if (!f) return;
@@ -71,8 +79,8 @@ static void bridgeWriteEngineState(int gameRU)
     fclose(f);
 
     /* rename() is atomic on POSIX; on Windows it overwrites if dest exists */
-    remove(BRIDGE_ENGINE_FILE);
-    rename(tmp, BRIDGE_ENGINE_FILE);
+    remove(gEngineFile);
+    rename(tmp, gEngineFile);
 }
 
 /* -----------------------------------------------------------------------
@@ -82,6 +90,23 @@ static void bridgeWriteEngineState(int gameRU)
 void bridgeInit(void)
 {
     memset(&gState, 0, sizeof(gState));
+
+#ifdef _WIN32
+    /* Resolve state dir relative to the executable, not the CWD.
+     * Exe is at <project>/HomeworldSDL/build/homeworld.exe
+     * State dir is at <project>/mothership/state/             */
+    char exePath[512];
+    if (GetModuleFileNameA(NULL, exePath, sizeof(exePath)))
+    {
+        /* Strip filename → get exe directory */
+        char *last = strrchr(exePath, '\\');
+        if (last) *(last + 1) = '\0';
+
+        snprintf(gStateFile,  sizeof(gStateFile),  "%s..\\..\\mothership\\state\\fleet_state.json",  exePath);
+        snprintf(gEngineFile, sizeof(gEngineFile), "%s..\\..\\mothership\\state\\engine_state.json", exePath);
+        snprintf(gCmdFile,    sizeof(gCmdFile),    "%s..\\..\\mothership\\state\\engine_cmd.json",   exePath);
+    }
+#endif
 }
 
 void bridgeTick(int gameRU)
@@ -94,7 +119,7 @@ void bridgeTick(int gameRU)
     bridgeWriteEngineState(gameRU);
 
     /* --- Python → C: read agent fleet state --- */
-    FILE *f = fopen(BRIDGE_STATE_FILE, "r");
+    FILE *f = fopen(gStateFile, "r");
     if (!f) { gState.valid = 0; return; }
 
     fseek(f, 0, SEEK_END);
@@ -146,21 +171,21 @@ FleetState *bridgeGetState(void)
 
 void bridgeProcessCommand(void)
 {
-    FILE *f = fopen(BRIDGE_CMD_FILE, "r");
+    FILE *f = fopen(gCmdFile, "r");
     if (!f) return;
 
     fseek(f, 0, SEEK_END);
     long len = ftell(f);
     rewind(f);
 
-    if (len <= 0 || len > 4096) { fclose(f); remove(BRIDGE_CMD_FILE); return; }
+    if (len <= 0 || len > 4096) { fclose(f); remove(gCmdFile); return; }
 
     char *buf = (char *)malloc((size_t)len + 1);
     if (!buf) { fclose(f); return; }
     fread(buf, 1, (size_t)len, f);
     buf[len] = '\0';
     fclose(f);
-    remove(BRIDGE_CMD_FILE);
+    remove(gCmdFile);
 
     if (strstr(buf, "add_ru"))
     {

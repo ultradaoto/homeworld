@@ -11,11 +11,11 @@
 #define BRIDGE_MAX_SHIPS  64
 #define BRIDGE_MAX_OBJ    256
 
-/* Paths relative to the game working directory (assets/).
-   Mothership state dir is one level up at ../mothership/state/. */
-#define BRIDGE_STATE_FILE  "../mothership/state/fleet_state.json"
-#define BRIDGE_ENGINE_FILE "../mothership/state/engine_state.json"
-#define BRIDGE_CMD_FILE    "../mothership/state/engine_cmd.json"
+/* Paths relative to the game working directory (HomeworldSDL/build/).
+   Mothership state dir is two levels up at ../../mothership/state/. */
+#define BRIDGE_STATE_FILE  "../../mothership/state/fleet_state.json"
+#define BRIDGE_ENGINE_FILE "../../mothership/state/engine_state.json"
+#define BRIDGE_CMD_FILE    "../../mothership/state/engine_cmd.json"
 
 typedef struct {
     char id[32];
