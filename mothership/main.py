@@ -41,6 +41,7 @@ Commands:
   dashboard       — live fleet status display (15 sec)
   outputs         — list all files in outputs/
   read <file>     — read an output file (rendered markdown)
+  cmd <json>      — send raw command to C engine (e.g. cmd {"type":"add_ru","amount":500})
   exit / quit     — shut down
   <anything else> — routed to Command Layer (planning LLM)
 [/dim]"""
@@ -152,6 +153,16 @@ def handle_command(msg: str) -> bool:
         ))
         return True
 
+    if lower.startswith("cmd "):
+        raw = msg[4:].strip()
+        try:
+            from bridge.state_file import write_command
+            write_command(json.loads(raw))
+            console.print(f"[green]Command sent to engine: {raw}[/green]")
+        except Exception as e:
+            console.print(f"[red]cmd error: {e}[/red]")
+        return True
+
     if lower.startswith("read "):
         fname = msg[5:].strip()
         fpath = os.path.join(config.OUTPUT_DIR, fname)
@@ -159,8 +170,12 @@ def handle_command(msg: str) -> bool:
             with open(fpath, encoding="utf-8") as f:
                 from rich.markdown import Markdown
                 console.print(Markdown(f.read()))
-        except FileNotFoundError:
-            console.print(f"[red]File not found: {fpath}[/red]")
+        except (FileNotFoundError, OSError):
+            # Show closest matches to help the commander
+            files = sorted(os.listdir(config.OUTPUT_DIR)) if os.path.exists(config.OUTPUT_DIR) else []
+            matches = [f for f in files if fname.split("_")[0] in f] if "_" in fname else files[-5:]
+            hint = "  " + "\n  ".join(matches[:5]) if matches else "  (no outputs yet)"
+            console.print(f"[red]File not found:[/red] {fname}\n[dim]Did you mean:\n{hint}[/dim]")
         return True
 
     return False
@@ -206,6 +221,11 @@ def run():
     setup_api_key()
 
     store.init_db()
+
+    from bridge import start as bridge_start
+    bridge_mode = os.environ.get("BRIDGE_MODE", "file")
+    bridge_start(mode=bridge_mode)
+    console.print(f"[dim]Karan Bridge active ({bridge_mode} mode) → {os.environ.get('BRIDGE_MODE', 'file')}[/dim]")
 
     console.print(HELP_TEXT)
 

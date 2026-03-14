@@ -10,6 +10,7 @@
 
 #include <math.h>
 
+#include "FleetBridge.h"
 #include "AIPlayer.h"
 #include "AIShip.h"
 #include "AITrack.h"
@@ -7296,6 +7297,13 @@ bool32 univUpdate(real32 phystimeelapsed)
 #else
 #define TMP_SAVEDGAMES_PATH "SavedGames/"
 #endif
+
+    /* Karan S'jet Bridge — sync Python Mothership fleet state once per second */
+    {
+        static int bridgeReady = 0;
+        if (!bridgeReady) { bridgeInit(); bridgeReady = 1; }
+        bridgeTick();
+    }
 
     if ((autoSaveDebug) && (UNIVERSE_WOODPECKER(31, 0)))    // every 2s
     {
