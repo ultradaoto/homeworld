@@ -11,6 +11,7 @@
 #include <math.h>
 
 #include "FleetBridge.h"
+#include "ConsMgr.h"
 #include "AIPlayer.h"
 #include "AIShip.h"
 #include "AITrack.h"
@@ -7363,14 +7364,22 @@ bool32 univUpdate(real32 phystimeelapsed)
                 else if (strcmp(req->ship_class, "HeavyCorvette") == 0)
                     stype = HeavyCorvette;
 
-                ShipRace srace = player->PlayerMothership->shiprace;
+                /* Queue through the ConsMgr build UI — shows progress bar,
+                   costs RUs incrementally, nJobs handles sequential builds */
+                shipsinprogress *factory =
+                    cmFindFactory(player->PlayerMothership);
+                ShipStaticInfo  *info    =
+                    GetShipStaticInfo(stype, player->PlayerMothership->shiprace);
 
-                /* Queue through the real build system — costs RUs, takes time */
-                clWrapBuildShip(&universe.mainCommandLayer, stype, srace,
-                                (uword)(player - universe.players),
-                                player->PlayerMothership);
-                printf("[BRIDGE] BUILD QUEUED: %s  player=%d\n",
-                       req->ship_class, (int)(player - universe.players));
+                if (factory && info)
+                {
+                    cmBuildJobsAdd(factory, info, req->count);
+                    printf("[BRIDGE] BUILD UI QUEUED: %dx%s\n",
+                           req->count, req->ship_class);
+                }
+                else
+                    printf("[BRIDGE] BUILD FAILED: factory=%p info=%p\n",
+                           (void*)factory, (void*)info);
             }
         }
     }

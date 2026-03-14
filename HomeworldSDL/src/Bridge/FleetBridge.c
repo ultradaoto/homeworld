@@ -211,13 +211,18 @@ void bridgeProcessCommand(void)
     if (strstr(buf, "build_ship"))
     {
         char cls[32] = {0};
+        int  count   = 1;
         jsonGetString(buf, "class", cls, sizeof(cls));
+        jsonGetInt(buf, "count", &count);
+        if (count < 1) count = 1;
+        if (count > 9) count = 9;
         if (cls[0] && gState.spawn_count < BRIDGE_MAX_SPAWNS)
         {
             BridgeSpawnRequest *req = &gState.spawn_queue[gState.spawn_count++];
             strncpy(req->ship_class, cls, sizeof(req->ship_class) - 1);
-            printf("[BRIDGE] QUEUED SPAWN: %s  (queue=%d)\n",
-                   req->ship_class, gState.spawn_count);
+            req->count = count;
+            printf("[BRIDGE] QUEUED BUILD: %dx%s  (queue=%d)\n",
+                   count, req->ship_class, gState.spawn_count);
         }
     }
 

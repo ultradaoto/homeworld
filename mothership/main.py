@@ -217,23 +217,32 @@ def handle_command(msg: str) -> bool:
         return True
 
     if lower == "scout" or lower.startswith("scout "):
-        path = msg[6:].strip() if lower.startswith("scout ") else ""
-        ru   = store.get("ru_balance", 0)
-        cost = 200
+        parts   = msg.split()
+        # scout [count] [path]  — count is optional integer, path is rest
+        count   = 1
+        path    = ""
+        if len(parts) > 1:
+            try:
+                count = int(parts[1])
+                path  = " ".join(parts[2:])
+            except ValueError:
+                path  = " ".join(parts[1:])
+        count   = max(1, min(count, 9))
+        ru      = store.get("ru_balance", 0)
+        cost    = 200 * count
         if ru < cost:
-            console.print(f"[red]Insufficient RU — scout costs {cost}, you have {ru}.[/red]")
+            console.print(f"[red]Insufficient RU — {count} scout(s) costs {cost}, you have {ru}.[/red]")
             return True
         store.set("ru_balance", ru - cost)
         from ships.scout import ScoutShip
         aid  = f"scout_{uuid.uuid4().hex[:6]}"
         ship = ScoutShip(aid)
         target = path or "project root"
-        console.print(f"[green]Scout deploying → {target}  (-{cost} RU)[/green]")
-        # Send build order to C engine — spawns a real LightInterceptor in-game
+        console.print(f"[green]Scout deploying → {target}  ({count}x -200 RU = -{cost} RU)[/green]")
         try:
             from bridge.state_file import write_command
-            write_command({"type": "build_ship", "class": "LightInterceptor"})
-            console.print("[dim]Build order sent to game engine.[/dim]")
+            write_command({"type": "build_ship", "class": "LightInterceptor", "count": count})
+            console.print(f"[dim]{count} build order(s) sent to game engine.[/dim]")
         except Exception:
             pass
         result = asyncio.run(ship.run({"path": path} if path else {}))

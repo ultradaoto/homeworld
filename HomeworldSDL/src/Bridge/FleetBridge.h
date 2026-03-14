@@ -26,6 +26,7 @@ typedef struct {
 
 typedef struct {
     char ship_class[32]; /* e.g. "LightInterceptor" */
+    int  count;          /* how many to queue        */
 } BridgeSpawnRequest;
 
 typedef struct {
