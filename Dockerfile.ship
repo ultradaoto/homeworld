@@ -1,0 +1,11 @@
+FROM python:3.12-slim
+
+RUN pip install --no-cache-dir anthropic requests
+
+WORKDIR /app
+COPY ship/agent.py .
+
+# SIGTERM triggers graceful escape-pod ejection (not SIGKILL)
+STOPSIGNAL SIGTERM
+
+CMD ["python", "agent.py"]

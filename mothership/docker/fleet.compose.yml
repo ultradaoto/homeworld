@@ -1,0 +1,202 @@
+# Homeworld Fleet — Docker Compose Shipyard
+#
+# Run:   docker-compose -f fleet.compose.yml up -d mothership-api
+# Scout: docker-compose -f fleet.compose.yml run --rm scout-template
+# Scale: docker-compose -f fleet.compose.yml up --scale scout-template=4
+#
+# Or use launcher.py from the TUI (the 'scout' build command auto-spawns containers).
+#
+# Models by cost doctrine:
+#   Probe       llama3.1:8b (local Ollama) — ~$0.00
+#   Scout       claude-haiku-4-5           — ~$0.001/hr
+#   Corvette    claude-sonnet-4-6          — ~$0.01/hr
+#   Carrier     claude-opus-4-6            — ~$0.15/hr (use sparingly)
+
+version: "3.9"
+
+x-ship-base: &ship-base
+  build:
+    context: ..
+    dockerfile: docker/Dockerfile.ship
+  environment:
+    - MOTHERSHIP_URL=http://mothership-api:3000
+    - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+  depends_on:
+    - mothership-api
+  restart: "no"       # ships don't auto-restart — they die and stay dead
+  stop_grace_period: 8s   # SIGTERM 8s before SIGKILL = time to eject escape pod
+  networks:
+    - fleet
+
+services:
+
+  # ── Mothership API ── always running ──────────────────────────────────────
+  mothership-api:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.mothership
+    container_name: mothership-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../state:/app/state
+      - ../outputs:/app/outputs
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "16"
+          memory: 32G
+    networks:
+      - fleet
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import httpx; httpx.get('http://localhost:3000/health', timeout=3)"]
+      interval: 10s
+      retries: 5
+      start_period: 15s
+
+  # ── Probe class — local Ollama, near-zero cost ────────────────────────────
+  probe-template:
+    <<: *ship-base
+    environment:
+      - MOTHERSHIP_URL=http://mothership-api:3000
+      - SHIP_CLASS=probe
+      - LLM_MODEL=llama3.1:8b
+      - OLLAMA_HOST=http://ollama:11434
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+    profiles: ["probe"]
+
+  # ── Scout class — cheap API ───────────────────────────────────────────────
+  scout-template:
+    <<: *ship-base
+    environment:
+      - MOTHERSHIP_URL=http://mothership-api:3000
+      - SHIP_CLASS=scout
+      - LLM_MODEL=claude-haiku-4-5-20251001
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 2G
+    profiles: ["scout"]
+
+  # ── Interceptor ───────────────────────────────────────────────────────────
+  interceptor-template:
+    <<: *ship-base
+    environment:
+      - MOTHERSHIP_URL=http://mothership-api:3000
+      - SHIP_CLASS=interceptor
+      - LLM_MODEL=claude-haiku-4-5-20251001
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+    profiles: ["interceptor"]
+
+  # ── Corvette — solid mid-tier, writes code ────────────────────────────────
+  corvette-template:
+    <<: *ship-base
+    environment:
+      - MOTHERSHIP_URL=http://mothership-api:3000
+      - SHIP_CLASS=corvette
+      - LLM_MODEL=claude-sonnet-4-6
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+    profiles: ["corvette"]
+
+  # ── Frigate — workhorse, longer tasks ────────────────────────────────────
+  frigate-template:
+    <<: *ship-base
+    environment:
+      - MOTHERSHIP_URL=http://mothership-api:3000
+      - SHIP_CLASS=frigate
+      - LLM_MODEL=claude-sonnet-4-6
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+    profiles: ["frigate"]
+
+  # ── Destroyer ────────────────────────────────────────────────────────────
+  destroyer-template:
+    <<: *ship-base
+    environment:
+      - MOTHERSHIP_URL=http://mothership-api:3000
+      - SHIP_CLASS=destroyer
+      - LLM_MODEL=claude-sonnet-4-6
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+    profiles: ["destroyer"]
+
+  # ── Carrier — sub-orchestrator, use sparingly ─────────────────────────────
+  carrier-template:
+    <<: *ship-base
+    environment:
+      - MOTHERSHIP_URL=http://mothership-api:3000
+      - SHIP_CLASS=carrier
+      - LLM_MODEL=claude-opus-4-6
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "8"
+          memory: 16G
+    profiles: ["carrier"]
+
+  # ── Salvage Corvette — escape pod recovery ────────────────────────────────
+  salvage-template:
+    <<: *ship-base
+    environment:
+      - MOTHERSHIP_URL=http://mothership-api:3000
+      - SHIP_CLASS=salvage
+      - LLM_MODEL=claude-sonnet-4-6
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
+    profiles: ["salvage"]
+
+  # ── Local Ollama (for probe/scout without API cost) ───────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    volumes:
+      - ollama_models:/root/.ollama
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+    profiles: ["local"]
+    networks:
+      - fleet
+
+networks:
+  fleet:
+    driver: bridge
+
+volumes:
+  ollama_models:

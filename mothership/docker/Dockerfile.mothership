@@ -1,0 +1,14 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install -r requirements.txt --no-cache-dir
+
+COPY . .
+
+# Persistent state and output dirs
+RUN mkdir -p /app/state /app/outputs
+
+EXPOSE 3000
+CMD ["python", "start_api.py"]

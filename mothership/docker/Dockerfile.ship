@@ -1,0 +1,13 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Minimal: only what the ship wrapper needs
+RUN pip install anthropic httpx python-dotenv --no-cache-dir
+
+COPY docker/ship_wrapper.py .
+
+# Ships die cleanly on SIGTERM (escape pod mechanic)
+STOPSIGNAL SIGTERM
+
+CMD ["python", "ship_wrapper.py"]

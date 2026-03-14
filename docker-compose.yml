@@ -1,0 +1,125 @@
+version: "3.9"
+
+# Homeworld Fleet — Phase 10C
+# Usage:
+#   cp .env.example .env && nano .env
+#   export CODEBASE_PATH=/path/to/your/project
+#   docker compose up --build                     # mothership + 2 scouts
+#   docker compose --profile salvage up           # + salvage corvette
+#   docker compose up --scale scout=8             # scale scouts at runtime
+
+networks:
+  homeworld:
+    driver: bridge
+
+volumes:
+  mothership_data:
+
+services:
+
+  # ── Mothership ─────────────────────────────────────────────────────────
+  mothership:
+    build: ./mothership
+    container_name: mothership
+    environment:
+      SQLITE_PATH: /data/homeworld.db
+    ports:
+      - "3000:3000"
+    volumes:
+      - mothership_data:/data
+      - ${CODEBASE_PATH:-.}:/codebase:rw
+    networks:
+      - homeworld
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:3000/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # ── Scout (haiku — cheap, fast file reads and lint) ───────────────────
+  scout-1:
+    build: ./ship
+    container_name: scout-1
+    environment:
+      SHIP_CLASS:             scout
+      SHIP_MODEL:             claude-haiku-4-5-20251001
+      MOTHERSHIP_URL:         http://mothership:3000
+      PORT:                   "4001"
+      CONTEXT_BUDGET_TOKENS:  "8000"
+      MAX_FILE_LOCKS:         "1"
+      ANTHROPIC_API_KEY:      ${ANTHROPIC_API_KEY}
+    volumes:
+      - ${CODEBASE_PATH:-.}:/codebase:rw
+    networks:
+      - homeworld
+    depends_on:
+      mothership:
+        condition: service_healthy
+    stop_grace_period: 10s
+
+  scout-2:
+    build: ./ship
+    container_name: scout-2
+    environment:
+      SHIP_CLASS:             scout
+      SHIP_MODEL:             claude-haiku-4-5-20251001
+      MOTHERSHIP_URL:         http://mothership:3000
+      PORT:                   "4002"
+      CONTEXT_BUDGET_TOKENS:  "8000"
+      MAX_FILE_LOCKS:         "1"
+      ANTHROPIC_API_KEY:      ${ANTHROPIC_API_KEY}
+    volumes:
+      - ${CODEBASE_PATH:-.}:/codebase:rw
+    networks:
+      - homeworld
+    depends_on:
+      mothership:
+        condition: service_healthy
+    stop_grace_period: 10s
+
+  # ── Assault Frigate (sonnet — feature writing, refactoring) ───────────
+  frigate-1:
+    build: ./ship
+    container_name: frigate-1
+    environment:
+      SHIP_CLASS:             assault_frigate
+      SHIP_MODEL:             claude-sonnet-4-6
+      MOTHERSHIP_URL:         http://mothership:3000
+      PORT:                   "5001"
+      CONTEXT_BUDGET_TOKENS:  "40000"
+      MAX_FILE_LOCKS:         "3"
+      ANTHROPIC_API_KEY:      ${ANTHROPIC_API_KEY}
+    volumes:
+      - ${CODEBASE_PATH:-.}:/codebase:rw
+    networks:
+      - homeworld
+    depends_on:
+      mothership:
+        condition: service_healthy
+    stop_grace_period: 10s
+    profiles:
+      - frigate
+
+  # ── Salvage Corvette (haiku — escape pod recovery) ────────────────────
+  salvage-corvette:
+    build: ./ship
+    container_name: salvage-corvette
+    environment:
+      SHIP_CLASS:             salvage_corvette
+      SHIP_MODEL:             claude-haiku-4-5-20251001
+      MOTHERSHIP_URL:         http://mothership:3000
+      PORT:                   "7001"
+      CONTEXT_BUDGET_TOKENS:  "16000"
+      MAX_FILE_LOCKS:         "2"
+      ANTHROPIC_API_KEY:      ${ANTHROPIC_API_KEY}
+    volumes:
+      - ${CODEBASE_PATH:-.}:/codebase:rw
+    networks:
+      - homeworld
+    depends_on:
+      mothership:
+        condition: service_healthy
+    stop_grace_period: 10s
+    profiles:
+      - salvage
