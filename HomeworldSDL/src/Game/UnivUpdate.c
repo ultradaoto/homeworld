@@ -7303,8 +7303,9 @@ bool32 univUpdate(real32 phystimeelapsed)
         static int bridgeReady = 0;
         if (!bridgeReady) { bridgeInit(); bridgeReady = 1; }
 
-        /* Count player's ships for TUI display */
-        int gameShips = 0, gameScouts = 0;
+        /* Count player's ships and collect scout IDs for TUI */
+        int   gameShips = 0, gameScouts = 0;
+        udword scoutIDs[BRIDGE_MAX_SHIPS];
         if (universe.curPlayerPtr)
         {
             Node *snode = universe.ShipList.head;
@@ -7315,14 +7316,15 @@ bool32 univUpdate(real32 phystimeelapsed)
                     s->objtype == OBJ_ShipType)
                 {
                     gameShips++;
-                    if (s->shiptype == LightInterceptor)
-                        gameScouts++;
+                    if (s->shiptype == LightInterceptor &&
+                        gameScouts < BRIDGE_MAX_SHIPS)
+                        scoutIDs[gameScouts++] = s->shipID.shipNumber;
                 }
                 snode = snode->next;
             }
         }
         bridgeTick(universe.curPlayerPtr ? universe.curPlayerPtr->resourceUnits : 0,
-                   gameShips, gameScouts);
+                   gameShips, gameScouts, scoutIDs);
 
         /* Phase 5: log agent fleet changes to stdout */
         {
@@ -7342,12 +7344,12 @@ bool32 univUpdate(real32 phystimeelapsed)
             }
         }
 
-        /* Phase 5: process pending ship spawn requests from TUI */
+        /* Phase 5: process ONE pending spawn per tick (sequential queue) */
         {
             FleetState *fs = bridgeGetState();
             Player     *player = universe.curPlayerPtr;
 
-            while (fs->spawn_count > 0 && player && player->PlayerMothership)
+            if (fs->spawn_count > 0 && player && player->PlayerMothership)
             {
                 fs->spawn_count--;
                 BridgeSpawnRequest *req = &fs->spawn_queue[fs->spawn_count];

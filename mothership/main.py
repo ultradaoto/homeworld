@@ -84,18 +84,21 @@ def show_fleet_status():
 
     engine = _get_engine_state()
     if engine:
-        game_ru     = engine.get("ru_balance", 0)
-        game_ships  = engine.get("game_ships", 0)
-        game_scouts = engine.get("game_scouts", 0)
-        scout_str   = f"  [bold]Scouts:[/bold] {game_scouts}" if game_scouts else ""
-        conn_line   = (f"[bold green]GAME: CONNECTED[/bold green]  |  "
-                       f"[bold]Game RU:[/bold] {game_ru}  "
-                       f"[bold]Ships:[/bold] {game_ships}{scout_str}")
+        game_ru    = engine.get("ru_balance", 0)
+        game_ships = engine.get("game_ships", 0)
+        scout_ids  = engine.get("scout_ids", [])
+        scout_str  = ""
+        if scout_ids:
+            names     = "  ".join(f"[cyan]KS-{sid}[/cyan]" for sid in scout_ids)
+            scout_str = f"\n[bold]Scouts:[/bold]     {names}"
+        conn_line  = (f"[bold green]GAME: CONNECTED[/bold green]  |  "
+                      f"[bold]Game RU:[/bold] {game_ru}  "
+                      f"[bold]Ships:[/bold] {game_ships}")
     else:
         conn_line = "[bold red]GAME: OFFLINE[/bold red]  [dim](launch Homeworld to connect)[/dim]"
 
     console.print(Panel(
-        f"{conn_line}\n"
+        f"{conn_line}{scout_str}\n"
         f"[bold]Agent RU:[/bold]   {ru}  |  [bold]Findings:[/bold] {findings}\n"
         f"[bold]Objective:[/bold]  {obj}\n"
         f"[bold]Fleet:[/bold]      {fleet_str}",

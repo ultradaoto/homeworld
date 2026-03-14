@@ -41,7 +41,8 @@ typedef struct {
 } FleetState;
 
 void        bridgeInit(void);
-void        bridgeTick(int gameRU, int gameShips, int gameScouts); /* call once per tick */
+void        bridgeTick(int gameRU, int gameShips, int gameScouts,
+                       unsigned int *scoutIDs); /* call once per tick */
 FleetState *bridgeGetState(void);
 void        bridgeProcessCommand(void);  /* consume engine_cmd.json if present */
 
