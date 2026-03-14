@@ -36,21 +36,27 @@ Commands:
   ru <N>                               — deposit N resource units to agent fleet
   sync                                 — sync agent RU balance from live game
   obj <text>                           — set current objective
-  scout [path]                         — explore codebase, map sectors, earn RU (costs 200)
-  tactic <aggressive|neutral|evasive>  — set fleet generation tactic
-  harvest <url>                        — scrape a URL, deposit RUs, save to outputs/
-  research                             — synthesize recent harvests into a report
-  destroy                              — produce polished briefing from research
-  carrier <sector> [objective]         — deploy sub-orchestrator to sector
-  sphere                               — 3-agent swarm verification
-  mine <code>                          — lay test mines for given code
-  salvage <url>                        — capture + structure hostile data
-  dashboard                            — live fleet status display (15 sec)
-  outputs                              — list all files in outputs/
-  read <file>                          — read an output file (rendered markdown)
-  cmd <json>                           — send raw command to C engine
-  exit / quit                          — shut down
-  <anything else>                      — routed to Command Layer (planning LLM)
+  scout [path]                            — map codebase sectors, earn RU (costs 200)
+  tactic <aggressive|neutral|evasive>     — set fleet generation tactic
+  harvest <url>                           — scrape a URL, deposit RUs
+  research                                — synthesize recent harvests into a report
+  destroy                                 — produce polished briefing
+  carrier <sector> [objective]            — deploy sub-orchestrator to sector
+  sphere                                  — 3-agent swarm verification
+  mine <code>                             — lay pytest mines for given code
+  salvage <url>                           — capture + structure hostile data
+  engage <error text>                     — spawn enemies from errors
+  intercept <error text>                  — debugging agent attacks the error
+  run tests                               — run mine fields, resolve enemies on pass
+  bentusi [list|<package>]                — trade RUs for packages
+  skirmish <objective> | <url> | <url>    — Blue vs Red fleet competition
+  hyperspace [commit message]             — snapshot + git commit + reset
+  dashboard                               — live fleet status (15 sec)
+  outputs                                 — list all files in outputs/
+  read <file>                             — read an output file (rendered markdown)
+  cmd <json>                              — send raw command to C engine
+  exit / quit                             — shut down
+  <anything else>                         — routed to Command Layer (planning LLM)
 [/dim]"""
 
 
@@ -271,6 +277,90 @@ def handle_command(msg: str) -> bool:
         console.print(f"[green]Salvage Corvette deploying → {url}[/green]")
         result = asyncio.run(ship.run({"url": url, "label": "capture"}))
         console.print(f"[bold]Salvage result:[/bold] {result}")
+        return True
+
+    if lower.startswith("engage "):
+        error_text = msg[7:].strip()
+        from combat.threat_engine import analyse_errors, spawn_enemies, enemy_count
+        threats = analyse_errors(error_text)
+        n = spawn_enemies(threats)
+        console.print(f"[red]{n} enemy ship{'s' if n != 1 else ''} spawned[/red]  "
+                      f"[dim]total threats: {enemy_count()}[/dim]")
+        return True
+
+    if lower in ("run tests", "testfire"):
+        from combat.ci_runner import run_tests
+        console.print("[yellow]Running mine fields...[/yellow]")
+        result = run_tests()
+        if result.get("status") == "no_mines":
+            console.print("[dim]No mines laid yet — use 'mine <code>' first.[/dim]")
+        else:
+            clr = "green" if result.get("failed", 1) == 0 else "red"
+            console.print(
+                f"[{clr}]passed:{result.get('passed',0)}  "
+                f"failed:{result.get('failed',0)}  "
+                f"enemies spawned:{result.get('enemies_spawned',0)}  "
+                f"resolved:{result.get('enemies_resolved',0)}[/{clr}]"
+            )
+        return True
+
+    if lower.startswith("intercept "):
+        error = msg[10:].strip()
+        from combat.interceptor_agent import InterceptorAgent
+        aid  = f"interceptor_{uuid.uuid4().hex[:6]}"
+        ship = InterceptorAgent(aid)
+        console.print("[yellow]Interceptor engaging...[/yellow]")
+        result = asyncio.run(ship.run({"error": error}))
+        console.print(f"[bold]Analysis:[/bold] {result.get('analysis', result)}")
+        return True
+
+    if lower.startswith("bentusi"):
+        arg = msg[7:].strip()
+        from bentusi.exchange import visit_bentusi, list_catalog
+        if not arg or arg == "list":
+            catalog = list_catalog()
+            rows = "\n".join(
+                f"  [bold]{pkg:12}[/bold]  {info['cost']:4} RU  →  {info['capability']}"
+                for pkg, info in catalog.items()
+            )
+            console.print(Panel(rows, title="[bold]Bentusi Exchange[/bold]",
+                                border_style="yellow"))
+        else:
+            console.print(f"[yellow]Opening Bentusi channel for {arg}...[/yellow]")
+            result = visit_bentusi(arg)
+            clr = "green" if result.get("status") == "traded" else "red"
+            console.print(f"[{clr}]{result}[/{clr}]")
+        return True
+
+    if lower.startswith("skirmish "):
+        parts = msg[9:].strip().split("|")
+        objective = parts[0].strip()
+        urls = [u.strip() for u in parts[1:] if u.strip()]
+        if not urls:
+            console.print("[red]Usage: skirmish <objective> | <url1> | <url2>[/red]")
+            return True
+        console.print("[yellow]Launching skirmish — Blue vs Red fleet...[/yellow]")
+        from arena.skirmish import run_skirmish
+        result = asyncio.run(run_skirmish(objective, urls))
+        winner = result.get("winner", "?")
+        clr    = "blue" if winner == "blue" else "red"
+        console.print(f"[bold {clr}]WINNER: {winner.upper()}[/bold {clr}]  "
+                      f"blue:{result.get('blue_score','?')}  "
+                      f"red:{result.get('red_score','?')}")
+        console.print(f"[dim]{result.get('verdict','')}[/dim]")
+        return True
+
+    if lower.startswith("hyperspace"):
+        commit_msg = msg[10:].strip()
+        from hyperspace import jump
+        console.print("[bold purple]HYPERSPACE MODULE CHARGING...[/bold purple]")
+        result = jump(commit_message=commit_msg)
+        console.print(f"[bold purple]JUMP COMPLETE — {result['ts']}[/bold purple]")
+        console.print(
+            f"[dim]RUs carried: {result['ru_carried']}  |  "
+            f"Archive: {result['archive']}  |  "
+            f"Git: {result['git'].get('msg') or result['git']}[/dim]"
+        )
         return True
 
     if lower.startswith("read "):

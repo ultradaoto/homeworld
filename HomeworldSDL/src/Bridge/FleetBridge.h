@@ -29,7 +29,8 @@ typedef struct {
     BridgeShip ships[BRIDGE_MAX_SHIPS];
     char       objective[BRIDGE_MAX_OBJ];
     int        findings;
-    int        valid;   /* 1 if last read succeeded */
+    int        enemy_count; /* Phase 6: threats spawned from errors */
+    int        valid;       /* 1 if last read succeeded */
 } FleetState;
 
 void        bridgeInit(void);

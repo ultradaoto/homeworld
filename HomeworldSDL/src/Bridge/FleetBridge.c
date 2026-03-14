@@ -194,5 +194,23 @@ void bridgeProcessCommand(void)
             gState.ru_balance += amount;
     }
 
+    /* Phase 6: error threats become enemy ships */
+    if (strstr(buf, "spawn_enemy"))
+    {
+        char ship_type[32] = {0};
+        int  sev = 0;
+        jsonGetString(buf, "ship", ship_type, sizeof(ship_type));
+        jsonGetInt(buf, "sev", &sev);
+        gState.enemy_count++;
+        printf("[BRIDGE] ENEMY SPAWNED: %-14s  sev=%d  threats=%d\n",
+               ship_type, sev, gState.enemy_count);
+    }
+
+    if (strstr(buf, "destroy_enemy"))
+    {
+        if (gState.enemy_count > 0) gState.enemy_count--;
+        printf("[BRIDGE] ENEMY DESTROYED  threats=%d\n", gState.enemy_count);
+    }
+
     free(buf);
 }
