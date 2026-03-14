@@ -36,6 +36,7 @@ Commands:
   ru <N>                               — deposit N resource units to agent fleet
   sync                                 — sync agent RU balance from live game
   obj <text>                           — set current objective
+  scout [path]                         — explore codebase, map sectors, earn RU (costs 200)
   tactic <aggressive|neutral|evasive>  — set fleet generation tactic
   harvest <url>                        — scrape a URL, deposit RUs, save to outputs/
   research                             — synthesize recent harvests into a report
@@ -198,6 +199,32 @@ def handle_command(msg: str) -> bool:
             console.print(f"[green]Command sent to engine: {raw}[/green]")
         except Exception as e:
             console.print(f"[red]cmd error: {e}[/red]")
+        return True
+
+    if lower == "scout" or lower.startswith("scout "):
+        path = msg[6:].strip() if lower.startswith("scout ") else ""
+        ru   = store.get("ru_balance", 0)
+        cost = 200
+        if ru < cost:
+            console.print(f"[red]Insufficient RU — scout costs {cost}, you have {ru}.[/red]")
+            return True
+        store.set("ru_balance", ru - cost)
+        from ships.scout import ScoutShip
+        aid  = f"scout_{uuid.uuid4().hex[:6]}"
+        ship = ScoutShip(aid)
+        target = path or "project root"
+        console.print(f"[green]Scout deploying → {target}  (-{cost} RU)[/green]")
+        result = asyncio.run(ship.run({"path": path} if path else {}))
+        if result.get("status") == "ok":
+            console.print(
+                f"[bold]Sectors mapped:[/bold] {result['sectors']}  "
+                f"[bold]Files:[/bold] {result['files']}  "
+                f"[bold green]+{result['ru_earned']} RU[/bold green]"
+            )
+            console.print(f"[dim]Map  → {result['map']}[/dim]")
+            console.print(f"[dim]Report → {result['report']}[/dim]")
+        else:
+            console.print(f"[red]Scout error:[/red] {result}")
         return True
 
     if lower.startswith("tactic "):

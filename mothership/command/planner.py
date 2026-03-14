@@ -11,12 +11,16 @@ and decide what agent (ship) to build or dispatch next.
 Ship classes and their real-world roles:
 - collector:    web scraping / data harvesting agent
 - researcher:   LLM synthesis / analysis agent
-- scout:        lightweight trend monitoring agent
+- scout:        codebase/filesystem explorer — walks directories, maps sectors,
+                assigns 3D coordinates, returns a navigable spatial map of the code
 - destroyer:    report generation / output writing agent
 - carrier:      sub-orchestrator managing a sector with its own micro-fleet
 - minelayer:    test generation agent (lays pytest "mines")
 - salvage:      structured data extraction from hostile/unstructured formats
 - support:      memory relay / context passing agent
+
+When a commander wants to understand an unfamiliar codebase or directory,
+order a scout. Scouts earn RU by discovering files and sectors.
 
 Respond ONLY with valid JSON in this exact format:
 {
