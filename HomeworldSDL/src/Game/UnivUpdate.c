@@ -7321,6 +7321,40 @@ bool32 univUpdate(real32 phystimeelapsed)
                 }
             }
         }
+
+        /* Phase 5: process pending ship spawn requests from TUI */
+        {
+            FleetState *fs = bridgeGetState();
+            Player     *player = universe.curPlayerPtr;
+
+            while (fs->spawn_count > 0 && player && player->PlayerMothership)
+            {
+                fs->spawn_count--;
+                BridgeSpawnRequest *req = &fs->spawn_queue[fs->spawn_count];
+
+                /* Map class name string → ShipType enum */
+                ShipType stype = LightInterceptor; /* default: scout */
+                if (strcmp(req->ship_class, "HeavyInterceptor") == 0)
+                    stype = HeavyInterceptor;
+                else if (strcmp(req->ship_class, "LightCorvette") == 0)
+                    stype = LightCorvette;
+                else if (strcmp(req->ship_class, "HeavyCorvette") == 0)
+                    stype = HeavyCorvette;
+
+                ShipRace  srace = GetValidRaceForShipType(stype);
+                vector    pos   = player->PlayerMothership->posinfo.position;
+
+                /* Offset slightly so it doesn't overlap the mothership */
+                pos.x += 200.0f + (float)(fs->spawn_count * 150);
+
+                Ship *newShip = univAddShip(stype, srace, &pos, player, TRUE);
+                if (newShip)
+                    printf("[BRIDGE] SPAWNED %s  player=%d\n",
+                           req->ship_class, (int)(player - universe.players));
+                else
+                    printf("[BRIDGE] SPAWN FAILED for %s\n", req->ship_class);
+            }
+        }
     }
 
     if ((autoSaveDebug) && (UNIVERSE_WOODPECKER(31, 0)))    // every 2s

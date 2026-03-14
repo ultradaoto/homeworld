@@ -194,6 +194,20 @@ void bridgeProcessCommand(void)
             gState.ru_balance += amount;
     }
 
+    /* Phase 5: build a real in-game ship from TUI command */
+    if (strstr(buf, "build_ship"))
+    {
+        char cls[32] = {0};
+        jsonGetString(buf, "class", cls, sizeof(cls));
+        if (cls[0] && gState.spawn_count < BRIDGE_MAX_SPAWNS)
+        {
+            BridgeSpawnRequest *req = &gState.spawn_queue[gState.spawn_count++];
+            strncpy(req->ship_class, cls, sizeof(req->ship_class) - 1);
+            printf("[BRIDGE] QUEUED SPAWN: %s  (queue=%d)\n",
+                   req->ship_class, gState.spawn_count);
+        }
+    }
+
     /* Phase 6: error threats become enemy ships */
     if (strstr(buf, "spawn_enemy"))
     {

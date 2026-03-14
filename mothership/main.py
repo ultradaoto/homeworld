@@ -220,6 +220,13 @@ def handle_command(msg: str) -> bool:
         ship = ScoutShip(aid)
         target = path or "project root"
         console.print(f"[green]Scout deploying → {target}  (-{cost} RU)[/green]")
+        # Send build order to C engine — spawns a real LightInterceptor in-game
+        try:
+            from bridge.state_file import write_command
+            write_command({"type": "build_ship", "class": "LightInterceptor"})
+            console.print("[dim]Build order sent to game engine.[/dim]")
+        except Exception:
+            pass
         result = asyncio.run(ship.run({"path": path} if path else {}))
         if result.get("status") == "ok":
             console.print(

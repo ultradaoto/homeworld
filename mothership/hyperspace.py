@@ -50,7 +50,7 @@ def jump(commit_message: str = "") -> dict:
             os.path.join(os.path.dirname(__file__), "..")
         )
         subprocess.run(
-            ["git", "add", "mothership/outputs/"],
+            ["git", "add", "-f", "mothership/outputs/"],
             cwd=project_root, check=True,
             capture_output=True
         )

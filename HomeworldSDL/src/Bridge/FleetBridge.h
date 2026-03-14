@@ -10,6 +10,7 @@
 
 #define BRIDGE_MAX_SHIPS  64
 #define BRIDGE_MAX_OBJ    256
+#define BRIDGE_MAX_SPAWNS 8
 
 /* Paths relative to the game working directory (HomeworldSDL/build/).
    Mothership state dir is two levels up at ../../mothership/state/. */
@@ -24,12 +25,18 @@ typedef struct {
 } BridgeShip;
 
 typedef struct {
+    char ship_class[32]; /* e.g. "LightInterceptor" */
+} BridgeSpawnRequest;
+
+typedef struct {
     int        ru_balance;
     int        ship_count;
     BridgeShip ships[BRIDGE_MAX_SHIPS];
     char       objective[BRIDGE_MAX_OBJ];
     int        findings;
-    int        enemy_count; /* Phase 6: threats spawned from errors */
+    int        enemy_count;                          /* Phase 6: error threats  */
+    int        spawn_count;                          /* Phase 5: pending spawns */
+    BridgeSpawnRequest spawn_queue[BRIDGE_MAX_SPAWNS];
     int        valid;       /* 1 if last read succeeded */
 } FleetState;
 
