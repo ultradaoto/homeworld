@@ -84,8 +84,13 @@ def show_fleet_status():
 
     engine = _get_engine_state()
     if engine:
-        game_ru   = engine.get("ru_balance", 0)
-        conn_line = f"[bold green]GAME: CONNECTED[/bold green]  |  [bold]Game RU:[/bold] {game_ru}"
+        game_ru     = engine.get("ru_balance", 0)
+        game_ships  = engine.get("game_ships", 0)
+        game_scouts = engine.get("game_scouts", 0)
+        scout_str   = f"  [bold]Scouts:[/bold] {game_scouts}" if game_scouts else ""
+        conn_line   = (f"[bold green]GAME: CONNECTED[/bold green]  |  "
+                       f"[bold]Game RU:[/bold] {game_ru}  "
+                       f"[bold]Ships:[/bold] {game_ships}{scout_str}")
     else:
         conn_line = "[bold red]GAME: OFFLINE[/bold red]  [dim](launch Homeworld to connect)[/dim]"
 

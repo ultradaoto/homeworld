@@ -65,7 +65,7 @@ static int jsonGetInt(const char *json, const char *key, int *out)
  * Write engine state for Python TUI to read
  * ----------------------------------------------------------------------- */
 
-static void bridgeWriteEngineState(int gameRU)
+static void bridgeWriteEngineState(int gameRU, int gameShips, int gameScouts)
 {
     /* Atomic write: tmp file then rename */
     char tmp[520];
@@ -74,8 +74,11 @@ static void bridgeWriteEngineState(int gameRU)
     FILE *f = fopen(tmp, "w");
     if (!f) return;
 
-    fprintf(f, "{\"ru_balance\":%d,\"game_active\":1,\"timestamp\":%.0f}\n",
-            gameRU, (double)time(NULL));
+    fprintf(f,
+        "{\"ru_balance\":%d,\"game_active\":1,"
+        "\"game_ships\":%d,\"game_scouts\":%d,"
+        "\"timestamp\":%.0f}\n",
+        gameRU, gameShips, gameScouts, (double)time(NULL));
     fclose(f);
 
     /* rename() is atomic on POSIX; on Windows it overwrites if dest exists */
@@ -109,14 +112,14 @@ void bridgeInit(void)
 #endif
 }
 
-void bridgeTick(int gameRU)
+void bridgeTick(int gameRU, int gameShips, int gameScouts)
 {
     time_t now = time(NULL);
     if (now - gLastTick < 1) return;   /* at most once per second */
     gLastTick = now;
 
     /* --- C → Python: write current game state --- */
-    bridgeWriteEngineState(gameRU);
+    bridgeWriteEngineState(gameRU, gameShips, gameScouts);
 
     /* --- Python → C: read agent fleet state --- */
     FILE *f = fopen(gStateFile, "r");

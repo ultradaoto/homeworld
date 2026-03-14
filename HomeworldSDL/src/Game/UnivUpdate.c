@@ -7302,7 +7302,27 @@ bool32 univUpdate(real32 phystimeelapsed)
     {
         static int bridgeReady = 0;
         if (!bridgeReady) { bridgeInit(); bridgeReady = 1; }
-        bridgeTick(universe.curPlayerPtr ? universe.curPlayerPtr->resourceUnits : 0);
+
+        /* Count player's ships for TUI display */
+        int gameShips = 0, gameScouts = 0;
+        if (universe.curPlayerPtr)
+        {
+            Node *snode = universe.ShipList.head;
+            while (snode != NULL)
+            {
+                Ship *s = (Ship *)listGetStructOfNode(snode);
+                if (s->playerowner == universe.curPlayerPtr &&
+                    s->objtype == OBJ_ShipType)
+                {
+                    gameShips++;
+                    if (s->shiptype == LightInterceptor)
+                        gameScouts++;
+                }
+                snode = snode->next;
+            }
+        }
+        bridgeTick(universe.curPlayerPtr ? universe.curPlayerPtr->resourceUnits : 0,
+                   gameShips, gameScouts);
 
         /* Phase 5: log agent fleet changes to stdout */
         {
