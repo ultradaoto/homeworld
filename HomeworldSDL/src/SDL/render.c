@@ -1031,7 +1031,7 @@ bool32 setupPixelFormat()
 #endif
 
     gl_extensions = glGetString(GL_EXTENSIONS);
-    printf("GL Extensions:\n%s\n", gl_extensions);
+    printf("GL Extensions:\n%s\n", gl_extensions ? gl_extensions : "(unavailable — OpenGL 3.0+ core context)");
 
     useVBO = glCheckExtension("GL_ARB_vertex_buffer_object");
 
@@ -1142,7 +1142,7 @@ sdword rndInit(rndinitdata *initData)
     dbgMessagef("rndInit: OpenGL Vendor     :%s", glGetString(GL_VENDOR));
     dbgMessagef("rndInit: OpenGL Renderer   :%s", glGetString(GL_RENDERER));
     dbgMessagef("rndInit: OpenGL Version    :%s", glGetString(GL_VERSION));
-    dbgMessagef("rndInit: OpenGL Extensions :%s", glGetString(GL_EXTENSIONS));
+    dbgMessagef("rndInit: OpenGL Extensions :%s", glGetString(GL_EXTENSIONS) ? glGetString(GL_EXTENSIONS) : "(unavailable)");
 #endif
     rndSetClearColor(colRGBA(0,0,0,255));
 #ifdef HW_ENABLE_GLES
