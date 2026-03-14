@@ -7361,18 +7361,14 @@ bool32 univUpdate(real32 phystimeelapsed)
                 else if (strcmp(req->ship_class, "HeavyCorvette") == 0)
                     stype = HeavyCorvette;
 
-                ShipRace  srace = GetValidRaceForShipType(stype);
-                vector    pos   = player->PlayerMothership->posinfo.position;
+                ShipRace srace = player->PlayerMothership->shiprace;
 
-                /* Offset slightly so it doesn't overlap the mothership */
-                pos.x += 200.0f + (float)(fs->spawn_count * 150);
-
-                Ship *newShip = univAddShip(stype, srace, &pos, player, TRUE);
-                if (newShip)
-                    printf("[BRIDGE] SPAWNED %s  player=%d\n",
-                           req->ship_class, (int)(player - universe.players));
-                else
-                    printf("[BRIDGE] SPAWN FAILED for %s\n", req->ship_class);
+                /* Queue through the real build system — costs RUs, takes time */
+                clWrapBuildShip(&universe.mainCommandLayer, stype, srace,
+                                (uword)(player - universe.players),
+                                player->PlayerMothership);
+                printf("[BRIDGE] BUILD QUEUED: %s  player=%d\n",
+                       req->ship_class, (int)(player - universe.players));
             }
         }
     }
