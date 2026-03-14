@@ -16,6 +16,7 @@ from command import planner
 from router  import dispatcher
 from ships.collector  import CollectorShip
 from ships.researcher import ResearcherShip
+from ships.destroyer  import DestroyerShip
 
 console = Console()
 
@@ -26,7 +27,7 @@ ASCII_BANNER = """[bold purple]
   ██╔══██║██║   ██║██║╚██╔╝██║██╔══╝  ██║███╗██║██║   ██║██╔══██╗██║     ██║  ██║
   ██║  ██║╚██████╔╝██║ ╚═╝ ██║███████╗╚███╔███╔╝╚██████╔╝██║  ██║███████╗██████╔╝
   ╚═╝  ╚═╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝ ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═════╝
-[/bold purple][dim]  MOTHERSHIP COMMAND INTERFACE  ·  Fleet Management System  ·  Phase 2[/dim]
+[/bold purple][dim]  MOTHERSHIP COMMAND INTERFACE  ·  Fleet Management System  ·  Phase 3[/dim]
 """
 
 HELP_TEXT = """[dim]
@@ -36,6 +37,10 @@ Commands:
   obj <text>      — set current objective
   harvest <url>   — scrape a URL, deposit RUs, save to outputs/
   research        — synthesize recent harvests into a report
+  destroy         — produce polished briefing from research
+  dashboard       — live fleet status display (15 sec)
+  outputs         — list all files in outputs/
+  read <file>     — read an output file (rendered markdown)
   exit / quit     — shut down
   <anything else> — routed to Command Layer (planning LLM)
 [/dim]"""
@@ -124,6 +129,38 @@ def handle_command(msg: str) -> bool:
         console.print("[green]Dispatching researcher...[/green]")
         result = asyncio.run(ship.run({}))
         console.print(f"[bold]Result:[/bold] {result}")
+        return True
+
+    if lower == "destroy":
+        agent_id = f"destroyer_{uuid.uuid4().hex[:6]}"
+        ship     = DestroyerShip(agent_id)
+        console.print("[green]Dispatching destroyer — producing briefing...[/green]")
+        result = asyncio.run(ship.run({}))
+        console.print(f"[bold]Result:[/bold] {result}")
+        return True
+
+    if lower == "dashboard":
+        from dashboard import show_dashboard
+        show_dashboard(seconds=15)
+        return True
+
+    if lower == "outputs":
+        files = sorted(os.listdir(config.OUTPUT_DIR)) if os.path.exists(config.OUTPUT_DIR) else []
+        console.print(Panel(
+            "\n".join(files) or "no outputs yet",
+            title="[bold]Outputs Directory[/bold]"
+        ))
+        return True
+
+    if lower.startswith("read "):
+        fname = msg[5:].strip()
+        fpath = os.path.join(config.OUTPUT_DIR, fname)
+        try:
+            with open(fpath, encoding="utf-8") as f:
+                from rich.markdown import Markdown
+                console.print(Markdown(f.read()))
+        except FileNotFoundError:
+            console.print(f"[red]File not found: {fpath}[/red]")
         return True
 
     return False

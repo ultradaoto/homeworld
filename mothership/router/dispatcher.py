@@ -5,6 +5,8 @@ from memory import store
 from config import MAX_COLLECTORS, MAX_RESEARCHERS, MAX_DESTROYERS
 from ships.collector  import CollectorShip
 from ships.researcher import ResearcherShip
+from ships.destroyer  import DestroyerShip
+from ships.scout      import ScoutShip
 
 LIMITS = {
     "collector":  MAX_COLLECTORS,
@@ -17,6 +19,8 @@ LIMITS = {
 SHIP_CLASSES = {
     "collector":  CollectorShip,
     "researcher": ResearcherShip,
+    "destroyer":  DestroyerShip,
+    "scout":      ScoutShip,
 }
 
 
