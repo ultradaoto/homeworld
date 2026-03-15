@@ -8,6 +8,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#ifdef HAVE_LIBCURL
+  #include <curl/curl.h>
+#endif
 
 #include "Chatting.h"
 #include "CommandNetwork.h"
@@ -53,6 +58,10 @@
 #define GC_ChatToAllies     2
 #define GC_RUTransfer       3
 
+/* Phase 14B AI chat defines */
+#define GC_AI_PORT    3000
+#define GC_AI_MAX_MSG 512
+
 /*=============================================================================
     Data:
 =============================================================================*/
@@ -91,6 +100,7 @@ bool32            gcRunning=FALSE;
 
 // booleans to indicate if the game chatting system is accepting text at the moment or not.
 bool32            InChatMode=FALSE;
+static bool32     gcAIMode=FALSE;   /* Phase 14B: single-player AI chat mode */
 sdword          MessageToAllies;
 bool32            ViewingBuffer=FALSE;
 
@@ -412,7 +422,7 @@ sdword gcParseChatEntry(char *message)
 ----------------------------------------------------------------------------*/
 void gcInGameChatEntry(char *name, featom *atom)
 {
-    sdword user;
+    sdword user = -1;   /* initialize to sentinel — fixes playerNames[-1] UB */
     chathistory *chat;
     char         temp[60];
     sdword       ruentered;
@@ -477,6 +487,32 @@ void gcInGameChatEntry(char *name, featom *atom)
         switch (uicTextEntryMessage(atom))
         {
             case CM_AcceptText :
+                if (!chatentrybox) { InChatMode = FALSE; gcAIMode = FALSE; feScreenDisappear(NULL,NULL); break; }
+                /* ── AI single-player intercept (Phase 14B) ── */
+                if (gcAIMode) {
+                    char aidisplay[GC_AI_MAX_MSG + 10];
+                    snprintf(aidisplay, sizeof(aidisplay), "YOU: %s", chatentrybox->textBuffer);
+                    gcProcessGameTextMessage(aidisplay, colRGBA(170, 215, 255, 255));
+#ifdef HAVE_LIBCURL
+                    {
+                        char *msgcopy = malloc(strlen(chatentrybox->textBuffer) + 1);
+                        if (msgcopy) {
+                            strcpy(msgcopy, chatentrybox->textBuffer);
+                            SDL_Thread *t = SDL_CreateThread(gcAISendThread, "gcAI", msgcopy);
+                            if (t) SDL_DetachThread(t); else free(msgcopy);
+                        }
+                    }
+#else
+                    gcProcessGameTextMessage("MOTHERSHIP: (libcurl not linked)",
+                                             colRGBA(200, 100, 100, 255));
+#endif
+                    uicTextEntrySet(chatentrybox, "", 0);
+                    InChatMode = FALSE;
+                    gcAIMode   = FALSE;
+                    feScreenDisappear(NULL, NULL);
+                    break;
+                }
+
                 chat = (chathistory *)memAlloc(sizeof(chathistory),"InGameChat",NonVolatile);
 
                 if (MessageToAllies==GC_ChatToAllies)
@@ -589,6 +625,7 @@ void gcChatTextDraw(featom *atom, regionhandle region)
     chathistory    *chat = NULL;
 
     if (!mrRenderMainScreen) return;
+    if (chathistoryfont == 0) return;   /* font not yet registered — skip draw */
 
     oldfont = fontMakeCurrent(chathistoryfont);
     fontShadowSet(FS_SE, colBlack);
@@ -884,6 +921,137 @@ void gcPollForNewChat(void)
 }
 
 /*-----------------------------------------------------------------------------
+    Name        : gcAITalkBegin / gcAISendThread — single-player AI chat (Phase 14B)
+=============================================================================*/
+
+#ifdef HAVE_LIBCURL
+
+static size_t gcAICurlWrite(void *ptr, size_t sz, size_t nm, void *ud)
+{
+    char *buf = (char *)ud;
+    size_t bytes = sz * nm;
+    size_t existing = strlen(buf);
+    if (existing + bytes < GC_AI_MAX_MSG - 1) {
+        memcpy(buf + existing, ptr, bytes);
+        buf[existing + bytes] = '\0';
+    }
+    return bytes;
+}
+
+static const char *gcAIJsonStr(const char *json, const char *key,
+                                char *out, size_t outsz)
+{
+    char search[64];
+    snprintf(search, sizeof(search), "\"%s\":\"", key);
+    const char *p = strstr(json, search);
+    if (!p) return NULL;
+    p += strlen(search);
+    size_t i = 0;
+    while (*p && *p != '"' && i < outsz - 1) {
+        if (*p == '\\' && *(p+1)) { p++; out[i++] = (*p=='n') ? '\n' : *p; }
+        else out[i++] = *p;
+        p++;
+    }
+    out[i] = '\0';
+    return out;
+}
+
+static int gcAISendThread(void *arg)
+{
+    char *msg = (char *)arg;    /* heap-allocated message string */
+    char url[64];
+    char body[GC_AI_MAX_MSG + 128];
+    char respbuf[GC_AI_MAX_MSG];
+
+    /* Quote escaping */
+    char safe[GC_AI_MAX_MSG * 2];
+    int j = 0;
+    for (int i = 0; msg[i] && j < (int)sizeof(safe)-2; i++) {
+        if (msg[i] == '"') safe[j++] = '\\';
+        safe[j++] = msg[i];
+    }
+    safe[j] = '\0';
+    free(msg);
+
+    snprintf(url, sizeof(url), "http://127.0.0.1:%d/api/console", GC_AI_PORT);
+    snprintf(body, sizeof(body),
+             "{\"ship_id\":\"MOTHERSHIP\",\"ship_type\":\"mothership\",\"message\":\"%s\"}",
+             safe);
+
+    respbuf[0] = '\0';
+    CURL *curl = curl_easy_init();
+    if (curl) {
+        struct curl_slist *hdrs = curl_slist_append(NULL,
+                                      "Content-Type: application/json");
+        curl_easy_setopt(curl, CURLOPT_URL,           url);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS,    body);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER,    hdrs);
+        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, gcAICurlWrite);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA,     respbuf);
+        curl_easy_setopt(curl, CURLOPT_TIMEOUT,       30L);
+        CURLcode rc = curl_easy_perform(curl);
+        if (rc == CURLE_OK) {
+            char reply[GC_AI_MAX_MSG] = "";
+            if (gcAIJsonStr(respbuf, "reply", reply, sizeof(reply)) && reply[0]) {
+                char display[GC_AI_MAX_MSG + 20];
+                snprintf(display, sizeof(display), "MOTHERSHIP: %s", reply);
+                gcProcessGameTextMessage(display, colRGBA(90, 240, 130, 255));
+            }
+        } else {
+            gcProcessGameTextMessage("MOTHERSHIP: (server unreachable)",
+                                     colRGBA(255, 100, 100, 255));
+        }
+        curl_slist_free_all(hdrs);
+        curl_easy_cleanup(curl);
+    }
+    return 0;
+}
+
+#endif /* HAVE_LIBCURL */
+
+/* Lightweight chat init safe to call mid-game (skips regChildAlloc). */
+static void gcAIStartup(void)
+{
+    chathistory *dummy;
+
+    chathistoryfont = frFontRegister(chathistoryfontname);
+
+    listInit(&chathistorylist);
+    dummy = memAlloc(sizeof(chathistory), "DummyChatThing", NonVolatile);
+    dummy->messageType = GC_BUFFERSTART;
+    listAddNode(&chathistorylist, &dummy->link, dummy);
+    dummy = memAlloc(sizeof(chathistory), "DummyChatThing", NonVolatile);
+    dummy->messageType = GC_BUFFEREND;
+    listAddNode(&chathistorylist, &dummy->link, dummy);
+    curPosition = &dummy->link;
+
+    chatmutex = SDL_CreateMutex();
+
+    /* Load FIB + register callbacks (safe to call mid-game) */
+    feScreensLoad(GC_FIBFile);
+    feCallbackAddMultiple(gcCallBack);
+    feDrawCallbackAddMultiple(gcDrawCallback);
+    gcScreenHandle = feScreenFind("Say_Chatting_Screen");
+    /* feScreenFind is fatal if not found — if we get here the screen is valid */
+
+    /* Intentionally skip regChildAlloc — chatdrawregion stays NULL.
+       The text input works via feScreenStart without a persistent draw region. */
+
+    gcRunning = TRUE;
+}
+
+/* Open the AI Talk interface (Y key — any game mode). */
+void gcAITalkBegin(void)
+{
+    if (InChatMode) return;                    /* already open */
+    if (!gcRunning) gcAIStartup();             /* safe mid-game init */
+    if (!gcRunning) return;                    /* FIB not found */
+    if (!chathistoryfont) return;              /* font not ready */
+    gcAIMode = TRUE;
+    gcChatEntryStart(FALSE);
+}
+
+/*-----------------------------------------------------------------------------
     Name        : gcStartup
     Description : This initializes the game chatting system, adding its regions to the game etc.
     Inputs      :
@@ -917,6 +1085,8 @@ void gcStartup(void)
         feCallbackAddMultiple(gcCallBack);
         feDrawCallbackAddMultiple(gcDrawCallback);
         gcScreenHandle = feScreenFind("Say_Chatting_Screen");
+
+        if (!gcScreenHandle) return;   /* FIB not found — abort silently */
 
         chatdrawatom.x      = gcScreenHandle->atoms[0].x;
         chatdrawatom.y      = gcScreenHandle->atoms[0].y;

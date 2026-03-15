@@ -46,5 +46,7 @@ void gcCancelViewingBuffer(void);
 void gcStartup(void);
 void gcShutdown(void);
 
+/* Phase 14B: single-player AI Talk interface (T key) */
+void gcAITalkBegin(void);
 
 #endif

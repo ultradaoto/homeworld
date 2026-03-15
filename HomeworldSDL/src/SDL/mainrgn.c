@@ -201,9 +201,7 @@ mrKeyFunction[] =
     {{TKEY,      0,      0,      0}, 1, RPE_KeyDown},
 #endif
 
-#if GUN_TUNE_MODE
-    {{YKEY,      0,      0,      0}, 1, RPE_KeyDown},
-#endif
+    {{YKEY,      0,      0,      0}, 1, RPE_KeyDown},   /* Phase 14B: Mothership Comms */
 
     {{SHIFTKEY,  0,      0,      0}, 1, RPE_KeyDown | RPE_KeyUp},
 #if ETG_RELOAD_KEY
@@ -1604,10 +1602,11 @@ void mrKeyPress(sdword ID)
     if (ID != QKEY)
 #endif
     {
-        // Drew's keybinding
-        ID = (sdword)kbCheckBindings(ID);
+        // Drew's keybinding — skip for YKEY since it's in kbCanMapKey but unbound (returns 0)
+        if (ID != YKEY)
+            ID = (sdword)kbCheckBindings(ID);
     }
-    
+
     if (ID == CAPSLOCKKEY)
     {
         goto docapslock;        // TO always on
@@ -2460,16 +2459,23 @@ cancelfocus:
             }
             break;
 #endif
+
+        /* Phase 14B: Y key — open Mothership Communication Interface (AI chat) */
+        case YKEY:
 #ifdef HW_BUILD_FOR_DEBUGGING
 #if GUN_TUNE_MODE
-        case YKEY:
             if (selSelected.numShips == 1 && !multiPlayerGame)
             {
                 gunTuningMode = !gunTuningMode;
+                break;
+            }
+#endif
+#endif
+            if (NoModifierKeyPressed())
+            {
+                gcAITalkBegin();
             }
             break;
-#endif
-#endif
 
         case VKEY:
 

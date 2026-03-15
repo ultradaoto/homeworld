@@ -74,6 +74,7 @@
 #include "Universe.h"
 #include "UnivUpdate.h"
 #include "utility.h"
+#include "FleetBridge.h"   /* Phase 14B: console overlay draw */
 #ifdef HW_ENABLE_GLES
 #include "SDL_syswm.h"
 #endif
@@ -4639,6 +4640,8 @@ void rndFlush(void)
 {
     glFlush();
     primErrorMessagePrint();
+    /* Phase 14B: draw AI console overlay (uses prim2d/font, before swap) */
+    FleetBridge_DrawConsoleOverlay(MAIN_WindowWidth, MAIN_WindowHeight);
 #ifdef HW_ENABLE_GLES
     eglSwapBuffers(egl_display, egl_surface);
 #else

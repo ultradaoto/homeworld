@@ -7,7 +7,9 @@
  * engine_built.json for Python and signals UnivUpdate to call clWrapBuildShip.
  */
 #include "FleetBridge.h"
+#include "ConsoleOverlay.h"   /* Phase 14B: in-game console chat */
 
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -737,4 +739,50 @@ void bridgeProcessCommand(void)
     }
 
     free(buf);
+}
+
+/* -----------------------------------------------------------------------
+ * Phase 14B: Console overlay hooks
+ * ----------------------------------------------------------------------- */
+
+/* Last ship the player right-clicked */
+static char g_selected_ship_id  [64] = {0};
+static char g_selected_ship_type[32] = {0};
+
+void FleetBridge_SetSelectedShip(const char *ship_id, const char *ship_type)
+{
+    if (!ship_id || !ship_type) return;
+    strncpy(g_selected_ship_id,   ship_id,   sizeof(g_selected_ship_id)   - 1);
+    strncpy(g_selected_ship_type, ship_type, sizeof(g_selected_ship_type) - 1);
+}
+
+/* Called by the right-click context menu when "Open Console" is chosen */
+void FleetBridge_OpenConsole(void)
+{
+    if (!g_selected_ship_id[0]) return;
+    ConsoleOverlay_Open(g_selected_ship_id, g_selected_ship_type);
+}
+
+/* Called once per frame from rndFlush() — draws overlay using prim2d/font */
+void FleetBridge_DrawConsoleOverlay(int screen_w, int screen_h)
+{
+    ConsoleOverlay_Draw(screen_w, screen_h);
+}
+
+/* Forward a SDL_KEYDOWN keycode to the overlay */
+void FleetBridge_ConsoleKeyInput(int sdl_keycode)
+{
+    ConsoleOverlay_HandleKey(sdl_keycode);
+}
+
+/* Forward a SDL_TEXTINPUT string to the overlay */
+void FleetBridge_ConsoleTextInput(const char *text)
+{
+    ConsoleOverlay_HandleText(text);
+}
+
+/* 1 if the console has focus and game keys should be suppressed */
+int FleetBridge_ConsoleHasFocus(void)
+{
+    return ConsoleOverlay_IsOpen();
 }

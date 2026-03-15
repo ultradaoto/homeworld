@@ -7,7 +7,8 @@ if get_option('b_sanitize') != 'none'
 	warning('Building with memory sanitizers on. If linking fails, try disabling them with `meson configure -Db_sanitize=none`.')
 endif
 
-dep_sdl = dependency('sdl2')
+dep_sdl     = dependency('sdl2')
+dep_sqlite3 = dependency('sqlite3', required: false)
 
 base_deps = [ ]
 
@@ -17,6 +18,9 @@ if host_machine.system() != 'emscripten'
 		dep_sdl,
 		meson.get_compiler('c').find_library('m', required: false),
 	]
+	if dep_sqlite3.found()
+		base_deps += [dep_sqlite3]
+	endif
 endif
 
 c_base_args = [

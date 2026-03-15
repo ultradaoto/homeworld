@@ -16,7 +16,7 @@ if _HERE not in sys.path:
 from rich.console import Console
 from rich.panel   import Panel
 
-console = Console()
+console = Console(highlight=False, emoji=False, safe_box=True)
 
 
 def print_banner():
@@ -66,7 +66,7 @@ def check_prerequisites():
             console.print(f"  [red]✗[/red] {e}")
         sys.exit(1)
 
-    console.print("[green]✓ Prerequisites OK[/green]")
+    console.print("[green]OK Prerequisites OK[/green]")
 
 
 def start_subsystems() -> subprocess.Popen:
@@ -140,20 +140,48 @@ def start_subsystems() -> subprocess.Popen:
     except Exception as exc:
         console.print(f"[yellow]⚠ Entropy services skipped: {exc}[/yellow]")
 
-    # 9. FastAPI Mothership server (subprocess — non-blocking)
-    api_proc = subprocess.Popen(
-        [sys.executable, "start_api.py"],
-        cwd=_HERE,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-    )
-    time.sleep(1.5)   # give FastAPI time to bind
-    steps.append(f"FastAPI Mothership :3000 (PID {api_proc.pid})")
+    # 9. FastAPI Mothership server (daemon thread — no subprocess needed)
+    _ensure_api_running(steps)
 
     for s in steps:
-        console.print(f"  [green]✓[/green] {s}")
+        console.print(f"  [green]OK[/green] {s}")
 
-    return api_proc
+    return None
+
+
+def _ensure_api_running(steps: list = None):
+    """Start the API in a background daemon thread if not already up."""
+    import urllib.request
+    import threading
+
+    def _alive():
+        try:
+            urllib.request.urlopen("http://127.0.0.1:3000/health", timeout=1)
+            return True
+        except Exception:
+            return False
+
+    if _alive():
+        if steps is not None:
+            steps.append("FastAPI Mothership :3000 (already running)")
+        return
+
+    def _run():
+        import uvicorn
+        uvicorn.run("api.server:app", host="127.0.0.1", port=3000,
+                    log_level="error", access_log=False)
+
+    t = threading.Thread(target=_run, daemon=True, name="api-server")
+    t.start()
+
+    # Wait up to 5 s for it to bind
+    for _ in range(10):
+        time.sleep(0.5)
+        if _alive():
+            break
+
+    if steps is not None:
+        steps.append("FastAPI Mothership :3000")
 
 
 def offer_game_launch():

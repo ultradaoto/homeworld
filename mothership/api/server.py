@@ -103,7 +103,50 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Homeworld Mothership", version="10.3.0", lifespan=lifespan)
+app = FastAPI(title="Homeworld Mothership", version="14.1.0", lifespan=lifespan)
+
+# ── Console chat (Phase 14B) ──────────────────────────────────────────────────
+
+class ConsoleMsg(BaseModel):
+    ship_id:   str
+    ship_type: str
+    message:   str
+
+
+def _voice_out():
+    """Lazy singleton — only imports if HOMEWORLD_VOICE=1."""
+    import os
+    if os.environ.get("HOMEWORLD_VOICE", "0") != "1":
+        return None
+    try:
+        from console.voice_output import VoiceOutput
+        return VoiceOutput()
+    except Exception:
+        return None
+
+
+@app.post("/api/console")
+def console_chat(msg: ConsoleMsg):
+    """
+    Called by the C-side GameChat via libcurl (and voice_input.py).
+    Returns a tactical reply from the Mothership AI.
+    """
+    from console.chat_agent import generate_reply
+    print(f"\n[MOTHERSHIP] {msg.ship_id}: {msg.message}", flush=True)
+    reply = generate_reply(msg.ship_id, msg.ship_type, msg.message)
+    print(f"[MOTHERSHIP] reply: {reply}", flush=True)
+    vo = _voice_out()
+    if vo:
+        vo.speak(reply)   # non-blocking
+    return {"reply": reply, "ship_id": msg.ship_id}
+
+
+@app.get("/api/console/history")
+def console_history(ship_id: str):
+    """Called when the console overlay first opens to restore session."""
+    from console.chat_agent import get_session_history
+    messages = get_session_history(ship_id)
+    return {"ship_id": ship_id, "messages": messages}
 
 
 # ── Health ────────────────────────────────────────────────────────────────────

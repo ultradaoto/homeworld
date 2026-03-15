@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 import sys
 import os
+
+# Force UTF-8 on Windows consoles (cp1252 can't handle arrows/unicode)
+for _stream in (sys.stdout, sys.stderr):
+    if _stream and hasattr(_stream, 'reconfigure'):
+        try: _stream.reconfigure(encoding='utf-8', errors='replace')
+        except Exception: pass
 import json
 import uuid
 import asyncio
@@ -646,6 +652,21 @@ def handle_command(msg: str) -> bool:
 
     if lower.startswith("mapindex"):
         root = msg[8:].strip() or "D:/Projects/Homeworld"
+        os.makedirs(root, exist_ok=True)
+        # Also ensure any stationed scout directories exist before indexing
+        try:
+            import sqlite3 as _sq
+            from memory.store import DB_PATH as _dbp
+            _con = _sq.connect(_dbp)
+            _dirs = [r[0] for r in _con.execute(
+                "SELECT assigned_directory FROM active_ships "
+                "WHERE assigned_directory IS NOT NULL AND assigned_directory != ''"
+            ).fetchall()]
+            _con.close()
+            for _d in _dirs:
+                os.makedirs(_d, exist_ok=True)
+        except Exception:
+            pass
         from map.sector_map import index_project, write_map_for_engine, map_stats
         console.print(f"[yellow]Indexing codebase at {root}...[/yellow]")
         index_project(root)
@@ -1245,6 +1266,7 @@ def handle_command(msg: str) -> bool:
             console.print(f"[red]Unknown ship: {parts[0]}[/red]")
             return True
         assigned_dir = parts[1]
+        os.makedirs(assigned_dir, exist_ok=True)
         try:
             import httpx
             resp = httpx.post(
@@ -1599,7 +1621,55 @@ def send_to_command_layer(msg: str):
     console.print(f"[dim]Output written → {out_path}[/dim]")
 
 
+def run_tui_loop():
+    """
+    The main commander TUI loop.
+    Called by cli/launcher.py after subsystem boot and save restore.
+    Can also be called directly from run() for the legacy python main.py path.
+    """
+    from cli.autosync import AutoSync
+    AutoSync().start()
+
+    console.print(HELP_TEXT)
+
+    while True:
+        try:
+            show_fleet_status()
+            msg = Prompt.ask("\n[bold purple]Commander[/bold purple]")
+        except (KeyboardInterrupt, EOFError):
+            console.print("\n[dim]Mothership standing by. Farewell, Commander.[/dim]")
+            break
+
+        msg = msg.strip()
+        if not msg:
+            continue
+
+        # Voice control commands (Phase 14B)
+        if msg.lower().startswith("voice"):
+            parts  = msg.split()
+            subcmd = parts[1].lower() if len(parts) > 1 else "status"
+            if subcmd == "on":
+                os.environ["HOMEWORLD_VOICE"] = "1"
+                console.print("[green]Voice enabled.[/green]")
+            elif subcmd == "off":
+                os.environ["HOMEWORLD_VOICE"] = "0"
+                console.print("[yellow]Voice disabled.[/yellow]")
+            elif subcmd == "status":
+                try:
+                    from console.voice_input  import VoiceInput
+                    from console.voice_output import VoiceOutput
+                    console.print(VoiceInput().status())
+                    console.print(VoiceOutput().status())
+                except Exception as e:
+                    console.print(f"[dim]Voice module unavailable: {e}[/dim]")
+            continue
+
+        if not handle_command(msg):
+            send_to_command_layer(msg)
+
+
 def run():
+    """Legacy entry point — boots subsystems then enters the TUI loop."""
     console.print(ASCII_BANNER)
     setup_api_key()
 
@@ -1636,22 +1706,7 @@ def run():
     except Exception as _e:
         console.print(f"[dim yellow]Entropy services unavailable: {_e}[/dim yellow]")
 
-    console.print(HELP_TEXT)
-
-    while True:
-        try:
-            show_fleet_status()
-            msg = Prompt.ask("\n[bold purple]Commander[/bold purple]")
-        except (KeyboardInterrupt, EOFError):
-            console.print("\n[dim]Mothership standing by. Farewell, Commander.[/dim]")
-            break
-
-        msg = msg.strip()
-        if not msg:
-            continue
-
-        if not handle_command(msg):
-            send_to_command_layer(msg)
+    run_tui_loop()
 
 
 if __name__ == "__main__":

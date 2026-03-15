@@ -140,4 +140,16 @@ void        bridgeCheckSectorEntry(const char *shipShortId,
                                    const char *shipType,
                                    float shipX, float shipY, float shipZ);
 
+/* Phase 14B: in-game console overlay (native prim2d/font renderer) */
+void        FleetBridge_SetSelectedShip(const char *ship_id,
+                                        const char *ship_type);
+void        FleetBridge_OpenConsole(void);
+/* Call from rndFlush() before SDL_GL_SwapWindow */
+void        FleetBridge_DrawConsoleOverlay(int screen_w, int screen_h);
+/* Call from HandleEvent() SDL_KEYDOWN — pass SDL_Keycode as int */
+void        FleetBridge_ConsoleKeyInput(int sdl_keycode);
+/* Call from HandleEvent() SDL_TEXTINPUT — pass event.text.text */
+void        FleetBridge_ConsoleTextInput(const char *text);
+int         FleetBridge_ConsoleHasFocus(void);
+
 #endif /* FLEET_BRIDGE_H */

@@ -12,6 +12,8 @@
 
 #include <SDL2/SDL.h>
 
+#include "homeworld_telemetry.h"   /* Phase 10C: SQLite fleet telemetry */
+#include "FleetBridge.h"            /* Phase 14B: console overlay */
 #include "AIPlayer.h"
 #include "AutoLOD.h"
 #include "avi.h"
@@ -1764,6 +1766,9 @@ void HandleEvent(SDL_Event const* pEvent) {
             }
             return;
 
+        case SDL_TEXTINPUT:
+            return;
+
         case SDL_KEYDOWN:
             if (pEvent->key.repeat != 0) //if it's a repeating key
             {
@@ -2010,6 +2015,7 @@ static bool32 InitWindow ()
 ----------------------------------------------------------------------------*/
 void WindowsCleanup(void)
 {
+    hw_telemetry_shutdown();  /* Phase 10C: close homeworld.db read handle */
     utyGameSystemsShutdown();
     rinFreeDevices();
 }
@@ -2192,6 +2198,7 @@ int main (int argc, char* argv[])
         }
 #endif
         preInit = TRUE;
+        ConsoleOverlay_Init();   /* Phase 14B: init AI chat overlay */
         if (!InitWindow())
         {
             errorString = ersWindowInit;
